@@ -21,6 +21,8 @@ class ProductController extends Controller
             'media' => 'required|string|max:191',
             'kapasitas' => 'required|string|max:191',
             'jumlah' => 'required|integer|min:1',
+            'tanggal_produksi'     => 'required|date',
+            'tanggal_kadaluarsa'   => 'required|date|after_or_equal:tanggal_produksi',
         ]);
 
         $jumlah = $request->jumlah;
@@ -36,16 +38,15 @@ class ProductController extends Controller
                 'type' => $request->type,
                 'media' => $request->media,
                 'kapasitas' => $request->kapasitas,
-                'tgl_produksi' => now(),
-                'tgl_beli' => now(),
-                'tgl_kadaluarsa' => now(),
+                'tgl_produksi' => $request->tanggal_produksi,
+                // 'tgl_beli' => now(),
+                'tgl_kadaluarsa' => $request->tanggal_kadaluarsa,
                 'garansi' => $request->garansi,
                 'lokasi' => $request->lokasi,
                 'kode_customer' => auth()->user()->kode_customer,
-                'last_service' => now(),
-                'last_refill' => now(),
-                'last_inspection' => now(),
-                'lokasi_id' => 1,
+                // 'last_service' => now(),
+                // 'last_refill' => now(),
+                // 'last_inspection' => now(),
             ]);
 
             $uniqueCode = 'PROD-' . str_pad($product->id, 6, '0', STR_PAD_LEFT);

@@ -34,7 +34,15 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     });
      Route::prefix('inspection')->group(function() {
         Route::post('add_inspection', [InspectionController::class, 'store']); 
-        Route::get('question', [InspectionController::class, 'question']); 
+        Route::post('update_inspection_schedule', [InspectionController::class, 'update']); 
+        Route::post('delete_inspection_schedule', [InspectionController::class, 'destroy']); 
+        Route::post('chage_status_inspection', [InspectionController::class, 'changeStatusInspection']); 
+        Route::get('list_inspection', [InspectionController::class, 'question']); 
+        Route::post('do_inspection', [InspectionController::class, 'inspectionApar']); 
+        Route::get('list_inspection', [InspectionController::class, 'listInspection']); 
+        Route::get('detail_inspection', [InspectionController::class, 'detailInspection']);
+        Route::get('list_apar_not_inspected', [InspectionController::class, 'aparNotInspected']); 
+        Route::get('list_apar_inspected', [InspectionController::class, 'aparInspected']); 
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
     });
 });
