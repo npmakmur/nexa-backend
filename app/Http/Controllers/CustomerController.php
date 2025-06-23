@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -20,6 +21,7 @@ class CustomerController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'level' => 'required|exists:tabel_level,id',
+            'gendet' => 'required',
         ]);
         $user = new User();
         $user->name = $request->name;
@@ -29,6 +31,7 @@ class CustomerController extends Controller
         $user->kode_customer = auth()->user()->kode_customer;
         $user->id_level = $request->level;
         $user->akun_aktif = 1;
+        $user->gender = $request->gender;
         $user->created_by = auth()->user()->id;
         $user->save();
         $aktivitas = Aktivitas::create([
@@ -61,6 +64,7 @@ class CustomerController extends Controller
                 Rule::unique('users')->ignore($user->id)
             ],
             'level' => 'required|exists:tabel_level,id',
+            'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg', // max 2MB
         ]);
 
         $user->name = $request->name;
@@ -68,6 +72,23 @@ class CustomerController extends Controller
         $user->email = $request->email;
         $user->id_level = $request->level;
         $user->updated_by = auth()->user()->id;
+        if ($request->hasFile('foto_profile')) {
+        // Hapus foto lama jika ada
+            if ($user->image && Storage::exists($user->image)) {
+                Storage::delete($user->image);
+            }
+
+            $file = $request->file('foto_profile');
+            $extension = $file->getClientOriginalExtension();
+            // Buat nama unik: userID_timestamp.ext
+            $filename = 'foto_' . $user->id . '_' . time() . '.' . $extension;
+
+            // Simpan di folder 'public/foto_profil'
+            $path =  $file->storeAs('foto_profil', $filename, 'public');
+
+            // Simpan path ke database
+            $user->image = $path;
+        }
         $user->save();
         $aktivitas = Aktivitas::create([
             'aktivitas_by' => auth()->user()->id,

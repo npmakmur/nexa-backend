@@ -25,7 +25,8 @@ class AuthController extends Controller
             'jenis_customer' => 'required',
             'alamat' => 'required',
             'telpon' => 'required',
-            'nama_organisasi' => 'required'
+            'nama_organisasi' => 'required',
+            'gender' => 'required'
         ]);
         $kode_customer = $this->generateUniqueCustomerCode();
         $code_verifikasi = random_int(100000, 999999);
@@ -37,6 +38,7 @@ class AuthController extends Controller
         $user->code_verifikasi = $code_verifikasi;
         $user->kode_customer = $kode_customer;
         $user->email_verified_at = now();
+        $user->gender = $request->gender;
         $user->id_level = 1;
         $user->save();
   
@@ -211,7 +213,6 @@ class AuthController extends Controller
             'user' => $cek,
         ], 200);
     }
-    
     public function logout(Request $request)
     {
         try {
@@ -220,11 +221,19 @@ class AuthController extends Controller
     
             return response()->json([
                 'message' => 'Logout berhasil, token telah dihapus'
-            ]);
+            ],200);
         } catch (JWTException $e) {
             return response()->json([
                 'message' => 'Gagal logout, token tidak ditemukan atau sudah tidak valid'
             ], 500);
         }
+    }
+    public function gender(Request $request)
+    {
+        $gander = DB::table("tabel_master_gender")->get();
+       return response()->json([
+                'message' => 'List Gander',
+                'data_gander' => $gander
+        ], 200);
     }
 }

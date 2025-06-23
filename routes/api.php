@@ -5,11 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\CheckTokenValid;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::get('gender', [AuthController::class, 'gender']);
 Route::post('email_verify', [AuthController::class, 'emailVerifed']);
 Route::post('generate_code', [AuthController::class, 'generateCodeVerify']);
 Route::post('forget_password', [AuthController::class, 'forgetPassword']);
@@ -24,6 +26,12 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('detail_user', [CustomerController::class, 'detailUser']);
         Route::delete('delete_user', [CustomerController::class, 'destroy']); 
         Route::get('count_user', [CustomerController::class, 'countUser']); 
+    });
+     Route::prefix('location')->group(function () {
+        Route::post('/create', [LokasiController::class, 'store']);
+        Route::post('/update', [LokasiController::class, 'update']);
+        Route::get('/list_lokasi', [LokasiController::class, 'listLokasi']);
+        Route::post('/delete', [LokasiController::class, 'destroy']);
     });
     Route::prefix('aktivitas')->group(function() {
         Route::get('show_aktivitas', [AktivitasController::class, 'show']); 
