@@ -171,6 +171,7 @@ class AuthController extends Controller
         if ($user->save()) {
             $subject = "Lupa Password";
             $teks = "Kami menerima permintaan untuk mereset kata sandi akun Anda. Berikut adalah kode verifikasi untuk melanjutkan proses reset kata sandi Anda:";
+            // Mail::to($user->email)->send(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             Mail::to($user->email)->queue(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             return response()->json([
                 'data' => $user,
