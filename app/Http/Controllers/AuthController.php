@@ -55,7 +55,8 @@ class AuthController extends Controller
         if ($user->save() && $customer ) {
             $subject = "Verfikasi Email";
             $teks = "Terima kasih telah mendaftar! Untuk menyelesaikan proses pendaftaran, silakan masukkan kode verifikasi berikut:";
-            Mail::to($user->email)->queue(new VerifikasiMail($user->name, $code_verifikasi,$teks, $subject));
+            Mail::to($user->email)->send(new VerifikasiMail($user->nama, $code_verifikasi,$teks, $subject));
+
         } else {
             return response()->json(['message' => 'Registrasi gagal'], 500);
         }
@@ -130,8 +131,10 @@ class AuthController extends Controller
         $user->code_verifikasi = $code_verifikasi;
         $user->email_verified_at = now();
         $user->save();
+        $subject = "Kode Barumu Sudah Siap!";
+        $teks = "Halo! Kode barumu sudah berhasil dibuat. Silakan gunakan kode berikut untuk melanjutkan prosesmu. Jangan kasih tahu siapa-siapa ya! 😊";
         if ($user->save()) {
-            Mail::to($user->email)->queue(new VerifikasiMail($nama, $code_verifikasi));
+            Mail::to($user->email)->send(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             return response()->json([
                 'message' => 'Generate Kode Berhasil',
             ], 201);
@@ -171,8 +174,8 @@ class AuthController extends Controller
         if ($user->save()) {
             $subject = "Lupa Password";
             $teks = "Kami menerima permintaan untuk mereset kata sandi akun Anda. Berikut adalah kode verifikasi untuk melanjutkan proses reset kata sandi Anda:";
-            // Mail::to($user->email)->send(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
-            Mail::to($user->email)->queue(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
+            Mail::to($user->email)->send(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
+            // Mail::to($user->email)->queue(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             return response()->json([
                 'data' => $user,
                 'message' => 'Generate Kode Berhasil',
