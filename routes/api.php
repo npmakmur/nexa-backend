@@ -39,6 +39,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     Route::prefix('product')->group(function() {
         Route::post('add_product', [ProductController::class, 'store']); 
         Route::get('count_apar', [ProductController::class, 'count_apar']); 
+        Route::get('list_apar', [ProductController::class, 'list_apar']); 
     });
      Route::prefix('inspection')->group(function() {
         Route::post('add_inspection', [InspectionController::class, 'store']); 

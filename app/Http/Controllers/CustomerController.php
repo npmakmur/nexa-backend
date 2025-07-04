@@ -21,7 +21,7 @@ class CustomerController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'level' => 'required|exists:tabel_level,id',
-            'gendet' => 'required',
+            'gender' => 'required',
         ]);
         $user = new User();
         $user->name = $request->name;

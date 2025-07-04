@@ -103,4 +103,12 @@ class ProductController extends Controller
             'data' => $count_apar,
         ]);
     }
+    public function list_apar (Request $request)
+    {
+        $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
+          return response()->json([
+            'message' => 'List apar berhasil didapatkan.',
+            'List apar' => $apar,
+        ]);
+    }
 }
