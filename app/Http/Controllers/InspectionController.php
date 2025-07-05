@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\TabelHeaderJadwal;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class InspectionController extends Controller
@@ -402,6 +404,72 @@ class InspectionController extends Controller
         'data_list_apar_inspected' => $apar,
     ], 201);
  }
+ public function generateAparReport(Request $request)
+ {
+    $validator = Validator::make($request->all(), [
+        'id_jadwal' => 'required|exists:tabel_header_jadwal,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validasi gagal',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    $data = DB::table('tabel_header_jadwal')
+        ->where('tabel_header_jadwal.id', $request->id_jadwal)
+        ->leftJoin('users as pic', 'pic.id', '=', 'tabel_header_jadwal.inspeksi_pic')
+        ->leftJoin('users as creator', 'creator.id', '=', 'tabel_header_jadwal.created_by')
+        ->select(
+            'tabel_header_jadwal.*',
+            'pic.name as inspection_name',
+            'creator.name as created_name'
+        )
+        ->first();
+
+    $apar = DB::table('tabel_inspection')
+        ->where("no_jadwal", $data->no_jadwal)
+        ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
+        ->leftJoin('tabel_detail_kondisi as pressure', 'pressure.id', '=', 'tabel_inspection.pressure')
+        ->leftJoin('tabel_detail_kondisi as seal', 'seal.id', '=', 'tabel_inspection.seal')
+        ->leftJoin('tabel_detail_kondisi as hose', 'hose.id', '=', 'tabel_inspection.hose')
+        ->leftJoin('tabel_detail_kondisi as cylinder', 'cylinder.id', '=', 'tabel_inspection.cylinder')
+        ->leftJoin('tabel_detail_kondisi as head_grip', 'head_grip.id', '=', 'tabel_inspection.head_grip')
+        ->leftJoin('tabel_detail_kondisi as spindle_head', 'spindle_head.id', '=', 'tabel_inspection.spindle_head')
+        ->leftJoin('tabel_detail_kondisi as hidrotest', 'hidrotest.id', '=', 'tabel_inspection.hidrotest')
+        ->select(
+            'tabel_inspection.*', 
+            'qc_name.name as qc_name',
+            'pressure.detail_kondisi as pressure_kondisi',
+            'seal.detail_kondisi as seal_kondisi',
+            'hose.detail_kondisi as hose_kondisi',
+            'cylinder.detail_kondisi as cylinder_kondisi',
+            'head_grip.detail_kondisi as head_grip_kondisi',
+            'spindle_head.detail_kondisi as spindle_head_kondisi',
+            'hidrotest.detail_kondisi as hidrotest_kondisi',
+        )
+        ->get();
+    // Generate PDF
+    $pdf = Pdf::loadView('pdf.apar_report', [
+        'agenda' => $data,
+        'apar' => $apar
+    ])->setPaper('A3', 'fertical');
+
+    // Simpan file ke storage (public path)
+    $filename = 'Laporan_Inspeksi_APAR_' . Str::slug($data->no_jadwal) . '.pdf';
+    $path = 'pdf_reports/' . $filename;
+
+    Storage::disk('public')->put($path, $pdf->output());
+
+    // Buat URL
+    $url = asset('storage/' . $path);
+
+    return response()->json([
+        'message' => 'Laporan berhasil dibuat',
+        'download_url' => $url,
+    ]);
+}
 //  public function updateStatusInspection (Request $request)
 //  {
 //     $validator = Validator::make($request->all(), [

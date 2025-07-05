@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Aktivitas;
 use App\Models\Product;
+use App\Models\TabelHeaderJadwal;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -109,6 +112,25 @@ class ProductController extends Controller
           return response()->json([
             'message' => 'List apar berhasil didapatkan.',
             'List apar' => $apar,
+        ]);
+    }
+    public function apar_done_permount (Request $request)
+    {
+        $now = Carbon::now();
+        $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
+        $count_apar = count($apar);
+        $list = TabelHeaderJadwal::where("tabel_header_jadwal.kode_customer", auth()->user()->kode_customer)
+            ->whereMonth('tabel_header_jadwal.tgl_mulai', $now->month)
+            ->whereYear('tabel_header_jadwal.tgl_mulai', $now->year)
+            ->leftJoin('users', 'users.id', '=', 'tabel_header_jadwal.inspeksi_pic')
+            ->select('tabel_header_jadwal.*', 'users.name as inspection_name')
+            ->first();
+        $inspection = DB::table('tabel_inspection')->where("no_jadwal", $list->no_jadwal)->get()->groupBy("kode_barang");
+        $apar_inspection = count($inspection);
+        $persentase = ($apar_inspection / $count_apar) * 100;
+         return response()->json([
+            'message' => 'Jumlah apar yang sudah di inspeksi pada '. $now->translatedFormat('F').".",
+            'data' => $persentase."%",
         ]);
     }
 }
