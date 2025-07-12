@@ -116,21 +116,99 @@ class ProductController extends Controller
     }
     public function apar_done_permount (Request $request)
     {
-        $now = Carbon::now();
+       $now = Carbon::now();
         $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
         $count_apar = count($apar);
+
+        // Ambil header jadwal inspeksi bulan ini
         $list = TabelHeaderJadwal::where("tabel_header_jadwal.kode_customer", auth()->user()->kode_customer)
             ->whereMonth('tabel_header_jadwal.tgl_mulai', $now->month)
             ->whereYear('tabel_header_jadwal.tgl_mulai', $now->year)
             ->leftJoin('users', 'users.id', '=', 'tabel_header_jadwal.inspeksi_pic')
             ->select('tabel_header_jadwal.*', 'users.name as inspection_name')
             ->first();
-        $inspection = DB::table('tabel_inspection')->where("no_jadwal", $list->no_jadwal)->get()->groupBy("kode_barang");
+
+        if (!$list) {
+            return response()->json([
+                'message' => 'Belum ada jadwal inspeksi pada bulan ' . $now->translatedFormat('F') . '.',
+                'data' => '0%', 200
+            ]);
+        }
+
+        // Jika ada jadwal, ambil data inspeksi
+        $inspection = DB::table('tabel_inspection')
+            ->where("no_jadwal", $list->no_jadwal)
+            ->get()
+            ->groupBy("kode_barang");
+
         $apar_inspection = count($inspection);
-        $persentase = ($apar_inspection / $count_apar) * 100;
-         return response()->json([
-            'message' => 'Jumlah apar yang sudah di inspeksi pada '. $now->translatedFormat('F').".",
-            'data' => $persentase."%",
+
+        // Hitung persentase
+        $persentase = $count_apar > 0 ? ($apar_inspection / $count_apar) * 100 : 0;
+
+        return response()->json([
+            'message' => 'Jumlah APAR yang sudah diinspeksi pada bulan ' . $now->translatedFormat('F') . '.',
+            'data' => round($persentase, 2) . '%', 200
+        ]);
+    }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'deskripsi' => 'nullable|string',
+            'brand' => 'required|string|max:191',
+            'type' => 'nullable|string|max:191',
+            'media' => 'required|string|max:191',
+            'kapasitas' => 'required|string|max:191',
+            'tanggal_produksi'     => 'required|date',
+            'tanggal_kadaluarsa'   => 'required|date|after_or_equal:tanggal_produksi',
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        $product->update([
+            'deskripsi' => $request->deskripsi,
+            'brand' => $request->brand,
+            'type' => $request->type,
+            'media' => $request->media,
+            'kapasitas' => $request->kapasitas,
+            'tgl_produksi' => $request->tanggal_produksi,
+            'tgl_kadaluarsa' => $request->tanggal_kadaluarsa,
+            'garansi' => $request->garansi,
+            'lokasi' => $request->lokasi,
+        ]);
+
+        // Update QR jika barcode belum ada atau ada permintaan untuk perbarui QR
+        if (!$product->barcode) {
+            $uniqueCode = 'PROD-' . str_pad($product->id, 6, '0', STR_PAD_LEFT);
+
+            $qrImage = Builder::create()
+                ->writer(new PngWriter())
+                ->data($uniqueCode)
+                ->size(300)
+                ->margin(10)
+                ->build();
+
+            $qrPath = 'qrcodes/' . $uniqueCode . '.png';
+            Storage::disk('public')->put($qrPath, $qrImage->getString());
+
+            $product->update([
+                'barcode' => $uniqueCode,
+                'kode_barang' => $uniqueCode,
+            ]);
+        }
+
+        // Catat aktivitas
+        Aktivitas::create([
+            'aktivitas_by' => auth()->user()->id,
+            'aktivitas_name' => 'Mengupdate apar',
+            'tanggal' => now(),
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Produk berhasil diperbarui.',
+            'data' => $product,
         ]);
     }
 }
