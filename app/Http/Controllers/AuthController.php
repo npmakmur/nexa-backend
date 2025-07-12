@@ -184,12 +184,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Gagal Membuat Code'], 500);
         }
     }
-    public function changePassword(Request $request)
+    public function passVerify(Request $request)
     {
         $request->validate([
             'id' => 'required|exists:users,id',
             'verifed_code' => 'required',
-            'new_password' => 'required'
         ]);
 
         $cek = User::where('id', $request->id)
@@ -199,16 +198,13 @@ class AuthController extends Controller
         if (!$cek) {
             return response()->json(['message' => 'Kode verifikasi salah.'], 404);
         }
-        
         // Cek apakah sudah lebih dari 5 menit
         $kodeDibuat = Carbon::parse($cek->updated_at);
         $sekarang = Carbon::now();
         if ($kodeDibuat->diffInMinutes($sekarang) > 5) {
             return response()->json(['message' => 'Kode sudah kadaluarsa.'], 410);
         }
-        $newPassword = Hash::make($request->new_password);
-        $cek->code_verifikasi = null; 
-        $cek->password = $newPassword; 
+        $cek->code_verifikasi = null;  
         $cek->updated_at = now(); 
         $cek->save();
         return response()->json([
@@ -216,6 +212,21 @@ class AuthController extends Controller
             'message' => 'Password berhasil diubah.',
             'user' => $cek,
         ], 200);
+    }
+    public function setPassword(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'new_pass' => 'required',
+        ]); 
+        $newPassword = Hash::make($request->new_pass);
+        $cek = User::where('id', $request->id)
+        ->update([
+            "password" => $newPassword
+        ]);
+        if (!$cek) {
+            return response()->json(['message' => 'Kode verifikasi salah.'], 404);
+        }
     }
     public function logout(Request $request)
     {

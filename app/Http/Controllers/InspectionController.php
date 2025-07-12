@@ -133,18 +133,6 @@ class InspectionController extends Controller
 }
  public function question (Request $request)
  {
-    $jadwal = TabelHeaderJadwal::where("id",$request->id_jadwal)
-        ->where('kode_customer', auth()->user()->kode_customer)
-        ->first();
-    if (! $jadwal) {
-          return response()->json(['message' => 'Jadwal tidak ditemukan.'], 404);
-    }
-    $produk = Product::where("kode_barang", $request->kode_barang)
-        ->where("kode_customer", $jadwal->kode_customer)
-        ->first();
-    if (! $produk) {
-         return response()->json(['message' => 'Apar tidak ditemukan.'], 404);
-    }
      $getQuestion = DB::table("tabel_detail_activity")->where('kode_activity','A1')->get()->map(function ($item) {
         $kondisi = DB::table("tabel_detail_kondisi")->where("kode_detail_activity", $item->kode_detail_activity)->get();
         $item->detail_kondisi = $kondisi;
@@ -152,8 +140,6 @@ class InspectionController extends Controller
     });
     return response()->json([
         'message' => 'list inspeksi dan detail kondisi.',
-        'data_produk' => $produk,
-        'data_jadwal' => $jadwal,
         'data_question' => $getQuestion
     ], 201);
  }

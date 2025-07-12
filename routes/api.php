@@ -15,7 +15,8 @@ Route::get('gender', [AuthController::class, 'gender']);
 Route::post('email_verify', [AuthController::class, 'emailVerifed']);
 Route::post('generate_code', [AuthController::class, 'generateCodeVerify']);
 Route::post('forget_password', [AuthController::class, 'forgetPassword']);
-Route::post('change_password', [AuthController::class, 'changePassword']);
+Route::post('change_password', [AuthController::class, 'passVerify']);
+Route::post('set_password', [AuthController::class, 'setPassword']);
 Route::middleware([CheckTokenValid::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('customer')->group(function () {
