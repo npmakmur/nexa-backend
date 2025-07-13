@@ -227,6 +227,43 @@ class ProductController extends Controller
             'history' => $history
         ], 200);
     }
+    public function apar_done_permount (Request $request)
+    {
+       $now = Carbon::now();
+        $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
+        $count_apar = count($apar);
+
+        // Ambil header jadwal inspeksi bulan ini
+        $list = TabelHeaderJadwal::where("tabel_header_jadwal.kode_customer", auth()->user()->kode_customer)
+            ->whereMonth('tabel_header_jadwal.tgl_mulai', $now->month)
+            ->whereYear('tabel_header_jadwal.tgl_mulai', $now->year)
+            ->leftJoin('users', 'users.id', '=', 'tabel_header_jadwal.inspeksi_pic')
+            ->select('tabel_header_jadwal.*', 'users.name as inspection_name')
+            ->first();
+
+        if (!$list) {
+            return response()->json([
+                'message' => 'Belum ada jadwal inspeksi pada bulan ' . $now->translatedFormat('F') . '.',
+                'data' => '0%', 200
+            ]);
+        }
+
+        // Jika ada jadwal, ambil data inspeksi
+        $inspection = DB::table('tabel_inspection')
+            ->where("no_jadwal", $list->no_jadwal)
+            ->get()
+            ->groupBy("kode_barang");
+
+        $apar_inspection = count($inspection);
+
+        // Hitung persentase
+        $persentase = $count_apar > 0 ? ($apar_inspection / $count_apar) * 100 : 0;
+
+        return response()->json([
+            'message' => 'Jumlah APAR yang sudah diinspeksi pada bulan ' . $now->translatedFormat('F') . '.',
+            'data' => round($persentase, 2) . '%', 200
+        ]);
+    }
 
 
 }
