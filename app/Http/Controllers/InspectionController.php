@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aktivitas;
 use App\Models\Product;
 use App\Models\TabelHeaderJadwal;
 use App\Models\User;
@@ -45,7 +46,6 @@ class InspectionController extends Controller
 
     return response()->json([
         'message' => 'Jadwal berhasil ditambahkan.',
-        'data' => $jadwal
     ], 201);
  }
  public function destroy (Request $request)
@@ -201,6 +201,7 @@ class InspectionController extends Controller
         'hidrotest'      => $request->hidrotest,
         'need_refill'    => $request->need_refill,
     ];
+    $now = Carbon::now();
     // ambil data jadwal,customer, data produk
     $jadwal = TabelHeaderJadwal::where("id", $request->id_jadwal)->first();
     if ($jadwal->status === "Selesai") {
@@ -273,6 +274,13 @@ class InspectionController extends Controller
                 "qc"                 => auth()->user()->id,
             ]
         );
+        Aktivitas::create([
+            'aktivitas_by' => auth()->id(),
+            'aktivitas_name' => 'Mengupdate Inspection id inspection ' . $request->id_inspection,
+            'tanggal' => $now,
+            'created_by' => auth()->id(),
+            'created_at' => $now,
+        ]);
     }else{
         $count_inspection = DB::table('tabel_inspection')->where("no_jadwal",$jadwal->no_jadwal)->count();
         $inspection = DB::table('tabel_inspection')->insert(
@@ -315,7 +323,24 @@ class InspectionController extends Controller
 
         $produk = Product::where("kode_barang",$request->kode_barang)
         ->update(["status" => $status]);
+         Aktivitas::create([
+            'aktivitas_by' => auth()->id(),
+            'aktivitas_name' => 'Inspection apar ' . $request->kode_barang,
+            'tanggal' => $now,
+            'created_by' => auth()->id(),
+            'created_at' => $now,
+        ]);
     }
+    $update_apar = Product::where("kode_barang",$request->kode_barang)->update([
+        "pressure" => $request->pressure,
+        "seal" => $request->seal,
+        "hose" => $request->hose,
+        "cylinder" => $request->cylinder,
+        "head_grip" => $request->head_grip,
+        "spindle_head" => $request->spindle_head,
+        "hidrotest" => $request->hidrotest,
+        "last_inspection" => $now,
+    ]);
      return response()->json([
         'message' => 'Ispeksi Apar berhasil.',
     ], 201);
