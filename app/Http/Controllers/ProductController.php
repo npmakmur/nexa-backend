@@ -101,7 +101,6 @@ class ProductController extends Controller
             'pdf_download_url' => url(Storage::url($pdfPath)),
         ]);
     }
-
     public function count_apar (Request $request)
     {
         $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
@@ -111,14 +110,32 @@ class ProductController extends Controller
             'data' => $count_apar,
         ]);
     }
-    public function list_apar (Request $request)
+    public function list_apar(Request $request)
     {
-        $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
-          return response()->json([
-            'message' => 'List apar berhasil didapatkan.',
-            'List apar' => $apar,
-        ]);
+        $query = Product::where("kode_customer", auth()->user()->kode_customer);
+
+        // Filter berdasarkan lokasi (lokasi)
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+
+        // Filter berdasarkan pencarian nama atau kode APAR (LIKE)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('brand', 'like', "%{$search}%")
+                ->orWhere('media', 'like', "%{$search}%");
+            });
+        }
+
+        $apar = $query->get();
+
+        return response()->json([
+            'message' => 'List APAR berhasil didapatkan.',
+            'list_apar' => $apar,
+        ], 200);
     }
+
     public function update(Request $request)
     {
         $request->validate([
@@ -131,7 +148,8 @@ class ProductController extends Controller
             'tanggal_produksi' => 'required|date',
             'tanggal_kadaluarsa' => 'required|date|after_or_equal:tanggal_produksi',
             'garansi' => 'nullable|string|max:191',
-            'lokasi' => 'required|exists:tabel_master_lokasi,id',
+            'lokasi' => 'required|exists:tabel_gedung,id',
+            'titik_penempatan_id' => 'required'
         ]);
 
        $product = Product::find($request->id);
@@ -146,6 +164,7 @@ class ProductController extends Controller
             $product->tgl_kadaluarsa = $request->tanggal_kadaluarsa;
             $product->garansi = $request->garansi;
             $product->lokasi = $request->lokasi;
+            $product->titik_penempatan_id = $request->titik_penempatan_id;
             $product->updated_at = now();
             $product->save();
         }
@@ -264,6 +283,4 @@ class ProductController extends Controller
             'data' => round($persentase, 2) . '%', 200
         ]);
     }
-
-
 }

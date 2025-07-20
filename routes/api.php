@@ -29,10 +29,15 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('count_user', [CustomerController::class, 'countUser']); 
     });
      Route::prefix('location')->group(function () {
-        Route::post('/create', [LokasiController::class, 'store']);
-        Route::post('/update', [LokasiController::class, 'update']);
+        Route::post('/create', [LokasiController::class, 'storeGedung']);
+        Route::post('/update_building', [LokasiController::class, 'updateGedung']);
+        Route::post('/create_location_point', [LokasiController::class, 'locationPoint']);
         Route::get('/list_lokasi', [LokasiController::class, 'listLokasi']);
-        Route::post('/delete', [LokasiController::class, 'destroy']);
+        Route::post('/update_location_point', [LokasiController::class, 'updateTitik']);
+        Route::post('/building/delete', [LokasiController::class, 'destroyGedung']);
+        Route::post('/location_point/delete', [LokasiController::class, 'destroyTitik']);
+        Route::get('/buildings/list', [LokasiController::class, 'apiListGedung']);
+        Route::get('/list_location_point', [LokasiController::class, 'apiListLocationPoint']);
     });
     Route::prefix('aktivitas')->group(function() {
         Route::get('show_aktivitas', [AktivitasController::class, 'show']); 
