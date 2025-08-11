@@ -174,178 +174,209 @@ class InspectionController extends Controller
  public function inspectionApar (Request $request)
  {
     $validator = Validator::make($request->all(), [
-        'id_jadwal'          => 'required',
-        'kode_barang'          => 'required',
-        'pressure'          => 'required',
-        'seal'              => 'required',
-        'hose'              => 'required',
-        'cylinder'          => 'required',
-        'head_grip'         => 'required',
-        'spindle_head'      => 'required',
-        'hidrotest'         => 'required',
-        'need_refill'       => 'required',
-        'pressure_img'      => 'image',
-        'seal_img'          => 'image',
-        'hose_img'          => 'image',
-        'cylinder_img'      => 'image',
-        'head_grip_img'     => 'image',
-        'spindle_head_img'  => 'image',
+        'id_jadwal'          => 'required|exists:tabel_header_jadwal,id',
+        'kode_barang'        => 'required|exists:tabel_produk,kode_barang',
+        'id_inspection'      => 'nullable|numeric',
+        'pressure'           => 'required|numeric',
+        'expired'            => 'required|numeric',
+        'selang'             => 'required|numeric',
+        'head_valve'         => 'required|numeric',
+        'korosi'             => 'required|numeric',
+        'pressure_img'       => 'nullable|image|max:2048',
+        'expired_img'        => 'nullable|image|max:2048',
+        'selang_img'         => 'nullable|image|max:2048',
+        'head_valve_img'     => 'nullable|image|max:2048',
+        'korosi_img'         => 'nullable|image|max:2048',
     ]);
-    $jawaban = [
-        'pressure'       => $request->pressure,
-        'seal'           => $request->seal,
-        'hose'           => $request->hose,
-        'cylinder'       => $request->cylinder,
-        'head_grip'      => $request->head_grip,
-        'spindle_head'   => $request->spindle_head,
-        'hidrotest'      => $request->hidrotest,
-        'need_refill'    => $request->need_refill,
-    ];
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validasi gagal.',
+            'errors'  => $validator->errors()
+        ], 422);
+    }
+
     $now = Carbon::now();
-    // ambil data jadwal,customer, data produk
-    $jadwal = TabelHeaderJadwal::where("id", $request->id_jadwal)->first();
-    if ($jadwal->status === "Selesai") {
-          return response()->json([
-            'message' => 'Inspeksi sudah selesai.',
-        ], 404);
-    }elseif($jadwal->status === "Dijeda"){
-          return response()->json([
-            'message' => 'Ispeksi Masih Dijeda.',
-        ], 404);
-    }
-    $nama_customer = DB::table('tabel_master_customer')->where('kode_customer',$jadwal->kode_customer)->first();
-    $produk = Product::where("kode_barang",$request->kode_barang)->first();
-    if (!$jadwal) {
-        return response()->json(['message' => 'Jadwal tidak ditemukan.'], 404);
-    }
-    // update inspection
-    $paths = [];
+    $userId = auth()->id();
+    $userKodeCustomer = auth()->user()->kode_customer;
 
-    $fields = [
-        'pressure_img',
-        'seal_img',
-        'hose_img',
-        'cylinder_img',
-        'head_grip_img',
-        'spindle_head_img',
+    // 2. Ambil data terkait yang penting
+    $schedule = DB::table('tabel_header_jadwal')->where("id", $request->id_jadwal)->first();
+    $product = DB::table('tabel_produk')->where("kode_barang", $request->kode_barang)->first();
+
+    // Periksa apakah jadwal dan produk ada
+    if (!$schedule || !$product) {
+        return response()->json(['message' => 'Jadwal atau Produk tidak ditemukan.'], 404);
+    }
+
+    // Periksa status jadwal
+    if ($schedule->status === "Selesai") {
+        return response()->json([
+            'message' => 'Inspeksi sudah selesai untuk jadwal ini.',
+        ], 400);
+    } elseif ($schedule->status === "Dijeda") {
+        return response()->json([
+            'message' => 'Inspeksi masih dijeda.',
+        ], 400);
+    }
+
+    $customer = DB::table('tabel_master_customer')
+                    ->where('kode_customer', $schedule->kode_customer)
+                    ->first();
+
+    if (!$customer) {
+        return response()->json(['message' => 'Pelanggan tidak ditemukan untuk jadwal ini.'], 404);
+    }
+
+    // 3. Proses ringkasan bagian yang rusak (partbroken_summary)
+    $idRusak = [2, 4, 8, 12, 15];
+    $inspectionAnswers = [
+        'pressure'   => (int) $request->pressure,
+        'expired'    => (int) $request->expired,
+        'selang'     => (int) $request->selang,
+        'head_valve' => (int) $request->head_valve,
+        'korosi'     => (int) $request->korosi,
     ];
-    $status = $this->getStatusAparById($jawaban);
 
-    foreach ($fields as $field) {
-        if ($request->hasFile($field)) {
-            $file = $request->file($field);
-            $timestamp = Carbon::now()->format('Ymd_His');
-            $random = Str::random(5);
-            $filename = "{$field}_{$timestamp}_{$random}." . $file->getClientOriginalExtension();
-            $paths[$field] = $file->storeAs('apar', $filename, 'public');
+    foreach ($inspectionAnswers as $field => $value) {
+        if (in_array($value, $idRusak)) {
+            DB::table('partbroken_summary')->updateOrInsert(
+                [
+                    'nama_detail_activity' => $field,
+                    'kode_customer'        => $userKodeCustomer,
+                ],
+                [
+                    'total_rusak'  => DB::raw('total_rusak + 1'),
+                    'last_user_id' => $userId,
+                    'updated_at'   => $now,
+                    'created_at'   => $now, // Tambahkan ini agar `created_at` diatur pada insert pertama
+                ]
+            );
         }
     }
-    $cek_inspection = DB::table("tabel_inspection")->where("id_inspection", $request->id_inspection)->first();
-    if ($cek_inspection) {
-       $inspection = DB::table('tabel_inspection')
-            ->where('id_inspection', $cek_inspection->id_inspection)
-            ->where('no_jadwal', $jadwal->no_jadwal)
-            ->where('barcode', $produk->barcode)
-            ->update([
-                "kode_customer"      => $jadwal->kode_customer,
-                "kode_barang"        => $produk->kode_barang,
-                "nama_customer"      => $nama_customer->nama_customer,
-                "tanggal_cek"        => Carbon::now()->format('Y-m-d'),
-                "lokasi"             => $produk->lokasi ?? null,
-                "kadaluarsa"         => $produk->tgl_kadaluarsa,
-                "status"             => $status,
-                "brand"              => $produk->brand,
-                "type"               => $produk->type,
-                "media"              => $produk->media,
-                "kapasitas"          => $produk->kapasitas,
-                "pressure"           => $request->pressure,
-                "pressure_img"       => $paths['pressure_img'] ?? null,
-                "seal"               => $request->seal,
-                "seal_img"           => $paths['seal_img'] ?? null,
-                "hose"               => $request->hose,
-                "hose_img"           => $paths['hose_img'] ?? null,
-                "cylinder"           => $request->cylinder,
-                "cylinder_img"       => $paths['cylinder_img'] ?? null,
-                "head_grip"          => $request->head_grip,
-                "head_grip_img"      => $paths['head_grip_img'] ?? null,
-                "spindle_head"       => $request->spindle_head,
-                "spindle_head_img"   => $paths['spindle_head_img'] ?? null,
-                "hidrotest"          => $request->hidrotest,
-                "qc"                 => auth()->user()->id,
-            ]
-        );
-        Aktivitas::create([
-            'aktivitas_by' => auth()->id(),
-            'aktivitas_name' => 'Mengupdate Inspection id inspection ' . $request->id_inspection,
-            'tanggal' => $now,
-            'created_by' => auth()->id(),
-            'created_at' => $now,
-        ]);
-    }else{
-        $count_inspection = DB::table('tabel_inspection')->where("no_jadwal",$jadwal->no_jadwal)->count();
-        $inspection = DB::table('tabel_inspection')->insert(
-            [
-                "no_jadwal" => $jadwal->no_jadwal,
-                "kode_customer" => $jadwal->kode_customer,
-                "nama_customer" => $nama_customer->nama_customer,
-                "kode_barang"        => $produk->kode_barang,
-                "tanggal_cek" => Carbon::now()->format('Y-m-d'),
-                "lokasi" => $produk->lokasi ?? null,
-                "barcode" => $produk->barcode,
-                "kadaluarsa" => $produk->tgl_kadaluarsa,
-                "status" => $status,
-                "brand" => $produk->brand,
-                "type" => $produk->type,
-                "media" => $produk->media,
-                "kapasitas" => $produk->kapasitas,
-                "pressure" => $request->pressure,
-                "pressure_img" => $paths['pressure_img'] ?? null,
-                "seal" => $request->seal,
-                "seal_img" => $paths['seal_img'] ?? null,
-                "hose" => $request->hose,
-                "hose_img" => $paths['hose_img'] ?? null,
-                "cylinder" => $request->cylinder,
-                "cylinder_img" => $paths['cylinder_img'] ?? null,
-                "head_grip" => $request->head_grip,
-                "head_grip_img" => $paths['head_grip_img'] ?? null,
-                "spindle_head" => $request->spindle_head,
-                "spindle_head_img" => $paths['spindle_head_img'] ?? null,
-                "hidrotest" => $request->hidrotest,
-                "qc" => auth()->user()->id,
-            ]
-        );
-        
-        $jadwal->status = 'On progress';
-        $jadwal->jumlah_apar = $count_inspection + 1;
-        $jadwal->tgl_mulai_sebenarnya = now()->format('Y-m-d');
-        $jadwal->updated_at = now(); // otomatis diisi juga kalau pakai save()
-        $jadwal->save();
 
-        $produk = Product::where("kode_barang",$request->kode_barang)
-        ->update(["status" => $status]);
-         Aktivitas::create([
-            'aktivitas_by' => auth()->id(),
-            'aktivitas_name' => 'Inspection apar ' . $request->kode_barang,
-            'tanggal' => $now,
-            'created_by' => auth()->id(),
-            'created_at' => $now,
-        ]);
+    // 4. Tangani unggahan gambar
+    $imagePaths = [];
+    $imageFields = [
+        'pressure_img',
+        'expired_img',
+        'selang_img',
+        'head_valve_img',
+        'korosi_img',
+    ];
+
+    foreach ($imageFields as $field) {
+        if ($request->hasFile($field)) {
+            $file = $request->file($field);
+            $timestamp = $now->format('Ymd_His');
+            $random = Str::random(5);
+            $filename = "{$field}_{$timestamp}_{$random}." . $file->getClientOriginalExtension();
+            $imagePaths[$field] = $file->storeAs('apar', $filename, 'public');
+        } else {
+            $imagePaths[$field] = null;
+        }
     }
-    $update_apar = Product::where("kode_barang",$request->kode_barang)->update([
-        "pressure" => $request->pressure,
-        "seal" => $request->seal,
-        "hose" => $request->hose,
-        "cylinder" => $request->cylinder,
-        "head_grip" => $request->head_grip,
-        "spindle_head" => $request->spindle_head,
-        "hidrotest" => $request->hidrotest,
-        "last_inspection" => $now,
-    ]);
-     return response()->json([
-        'message' => 'Ispeksi Apar berhasil.',
-    ], 201);
-    
 
+    // 5. Tentukan status APAR
+    $status = $this->getStatusAparById($inspectionAnswers);
+
+    // 6. Siapkan data inspeksi umum
+    $inspectionData = [
+        "kode_customer"      => $schedule->kode_customer,
+        "nama_customer"      => $customer->nama_customer,
+        "kode_barang"        => $product->kode_barang,
+        "tanggal_cek"        => $now->format('Y-m-d'),
+        "lokasi"             => $product->lokasi,
+        "barcode"            => $product->barcode,
+        "status"             => $status,
+        "brand"              => $product->brand,
+        "type"               => $product->type,
+        "media"              => $product->media,
+        "kapasitas"          => $product->kapasitas,
+        "pressure"           => $request->pressure,
+        "pressure_img"       => $imagePaths['pressure_img'],
+        "expired"            => $request->expired,
+        "expired_img"        => $imagePaths['expired_img'],
+        "hose"             => $request->selang,
+        "hose_img"         => $imagePaths['selang_img'],
+        "head_valve"         => $request->head_valve,
+        "head_valve_img"     => $imagePaths['head_valve_img'],
+        "korosi"             => $request->korosi,
+        "korosi_img"         => $imagePaths['korosi_img'],
+        "qc"                 => $userId,
+        "updated_at"         => $now,
+        'created_at'         => $now, // Tambahkan ini untuk insert
+    ];
+
+    // 7. Masukkan atau Perbarui `tabel_inspection`
+    $inspectionId = $request->input('id_inspection');
+    $activityMessage = '';
+
+    if ($inspectionId) {
+        // Perbarui catatan inspeksi yang sudah ada
+        $updated = DB::table('tabel_inspection')
+                    ->where('id_inspection', $inspectionId)
+                    ->update($inspectionData);
+
+        if ($updated) {
+            $activityMessage = 'Memperbarui Inspeksi dengan ID inspeksi ' . $inspectionId;
+        } else {
+            // Logika ini diperbaiki: Jika id_inspection tidak ada, itu adalah insert
+            $inspectionData['no_jadwal'] = $schedule->no_jadwal;
+            DB::table('tabel_inspection')->insert($inspectionData);
+            $activityMessage = 'Membuat Inspeksi baru karena ID inspeksi ' . $inspectionId . ' tidak ditemukan.';
+        }
+    } else {
+        // Buat catatan inspeksi baru
+        $inspectionData['no_jadwal'] = $schedule->no_jadwal;
+        DB::table('tabel_inspection')->insert($inspectionData);
+        $activityMessage = 'Inspeksi APAR baru: ' . $request->kode_barang;
+
+        // Hanya perbarui status jadwal pada inspeksi PERTAMA untuk jadwal ini
+        if ($schedule->status === 'Belum dikerjakan' || $schedule->status === 'Menunggu') {
+            DB::table('tabel_header_jadwal')
+                ->where('id', $schedule->id)
+                ->update([
+                    'status'               => 'On progress',
+                    'tgl_mulai_sebenarnya' => $now->format('Y-m-d'),
+                    'updated_at'           => $now,
+                ]);
+        }
+    }
+
+    // Hitung ulang jumlah APAR yang telah diinspeksi untuk jadwal ini
+    DB::table('tabel_header_jadwal')
+        ->where('id', $schedule->id)
+        ->update([
+            'jumlah_apar' => DB::table('tabel_inspection')->where("no_jadwal", $schedule->no_jadwal)->count(),
+            'updated_at'  => $now,
+        ]);
+
+    // 8. Perbarui status Produk dan tanggal inspeksi terakhir
+    DB::table('tabel_produk')->where("kode_barang", $request->kode_barang)->update([
+        "pressure"        => $request->pressure,
+        "expired"         => $request->expired,
+        "hose"          => $request->selang,
+        "head_valve"      => $request->head_valve,
+        "korosi"          => $request->korosi,
+        "status"          => $status,
+        "last_inspection" => $now,
+        "updated_at"      => $now, // Tambahkan updated_at
+    ]);
+
+    // 9. Catat aktivitas
+    DB::table('tabel_aktivitas')->insert([
+        'aktivitas_by'   => $userId,
+        'aktivitas_name' => $activityMessage,
+        'tanggal'        => $now,
+        'created_by'     => $userId,
+        'created_at'     => $now,
+    ]);
+
+    return response()->json([
+        'message' => 'Inspeksi APAR berhasil.',
+        'status'  => $status,
+    ], 201);
  }
  public function listInspection (Request $request)
  {
@@ -375,9 +406,19 @@ class InspectionController extends Controller
     ->first();
     $apar = DB::table('tabel_inspection')->where("no_jadwal", $data->no_jadwal)
     ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
+    ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_inspection.pressure', '=', 'pressure_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
     ->select(
         'tabel_inspection.*',
         'qc_name.name as qc_name',
+        'pressure_kondisi.detail_kondisi as detail_pressure',
+        'hose_kondisi.detail_kondisi as detail_hose',
+        'head_valve_kondisi.detail_kondisi as detail_head_valve',
+        'korosi_kondisi.detail_kondisi as detail_korosi',
+        'expired_kondisi.detail_kondisi as detail_expired'
     )
     ->get();
     return response()->json([
@@ -480,6 +521,26 @@ class InspectionController extends Controller
         'message' => 'Laporan berhasil dibuat',
         'download_url' => $url,
     ]);
+}
+public function precetagePartBroken (Request $request)
+{
+    $all_inspek = DB::table('tabel_inspection')->where('kode_customer', auth()->user()->kode_customer)->count();
+    $partBroken = DB::table('partbroken_summary')
+    ->where('kode_customer', auth()->user()->kode_customer)
+    ->get()
+    ->map(function ($data) use ($all_inspek) {
+        $totalPartBroken = $data->total_rusak;
+         $percentage = $all_inspek > 0 
+            ? round(($totalPartBroken / $all_inspek) * 100, 2) 
+            : 0;
+        $data->persentase_rusak = $percentage;
+
+        return $data;
+    });
+    return response()->json([
+        'message' => 'Presentasi part sering rusak',
+        'data' => $partBroken,
+    ],200);
 }
 //  public function updateStatusInspection (Request $request)
 //  {

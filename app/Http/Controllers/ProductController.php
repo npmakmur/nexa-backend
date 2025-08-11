@@ -205,18 +205,17 @@ class ProductController extends Controller
         $product = Product::select(
             'tabel_produk.*', 
             'pressure_kondisi.detail_kondisi as detail_pressure',
-            'seal_kondisi.detail_kondisi as detail_seal',
             'hose_kondisi.detail_kondisi as detail_hose',
-            'cylinder_kondisi.detail_kondisi as detail_cylinder',
-            'head_grip_kondisi.detail_kondisi as detail_head_grip',
-            'hidrotest_kondisi.detail_kondisi as detail_hidrotest',
+            'head_valve_kondisi.detail_kondisi as detail_head_valve',
+            'korosi_kondisi.detail_kondisi as detail_korosi',
+            'expired_kondisi.detail_kondisi as detail_expired',
         )
         ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_produk.pressure', '=', 'pressure_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as seal_kondisi', 'tabel_produk.seal', '=', 'seal_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_produk.hose', '=', 'hose_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as cylinder_kondisi', 'tabel_produk.cylinder', '=', 'cylinder_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as head_grip_kondisi', 'tabel_produk.head_grip', '=', 'head_grip_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as hidrotest_kondisi', 'tabel_produk.hidrotest', '=', 'hidrotest_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_produk.head_valve', '=', 'head_valve_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_produk.korosi', '=', 'korosi_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_produk.expired', '=', 'expired_kondisi.id')
+
         ->where('kode_barang', $request->id_barang)
         ->first();
 
@@ -224,18 +223,16 @@ class ProductController extends Controller
         ->select(
             'tabel_inspection.*', 
             'pressure_kondisi.detail_kondisi as detail_pressure',
-            'seal_kondisi.detail_kondisi as detail_seal',
             'hose_kondisi.detail_kondisi as detail_hose',
-            'cylinder_kondisi.detail_kondisi as detail_cylinder',
-            'head_grip_kondisi.detail_kondisi as detail_head_grip',
-            'hidrotest_kondisi.detail_kondisi as detail_hidrotest'
+            'head_valve_kondisi.detail_kondisi as detail_head_valve',
+            'korosi_kondisi.detail_kondisi as detail_korosi',
+            'expired_kondisi.detail_kondisi as detail_expired'
         )
         ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_inspection.pressure', '=', 'pressure_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as seal_kondisi', 'tabel_inspection.seal', '=', 'seal_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as cylinder_kondisi', 'tabel_inspection.cylinder', '=', 'cylinder_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as head_grip_kondisi', 'tabel_inspection.head_grip', '=', 'head_grip_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as hidrotest_kondisi', 'tabel_inspection.hidrotest', '=', 'hidrotest_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
         ->where("tabel_inspection.kode_barang", $product->kode_barang)
         ->get();
 

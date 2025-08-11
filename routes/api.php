@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\LokasiController;
+use App\Http\Controllers\PenawaranController;
 use App\Http\Controllers\ProductController;
 use App\Http\Middleware\CheckTokenValid;
 
@@ -50,7 +51,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::post('update_apar', [ProductController::class, 'update']); 
         Route::post('detai_apar', [ProductController::class, 'detai_apar']); 
     });
-     Route::prefix('inspection')->group(function() {
+    Route::prefix('inspection')->group(function() {
         Route::post('add_inspection', [InspectionController::class, 'store']); 
         Route::post('update_inspection_schedule', [InspectionController::class, 'update']); 
         Route::post('delete_inspection_schedule', [InspectionController::class, 'destroy']); 
@@ -62,6 +63,11 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('list_apar_not_inspected', [InspectionController::class, 'aparNotInspected']); 
         Route::get('list_apar_inspected', [InspectionController::class, 'aparInspected']); 
         Route::post('download_report', [InspectionController::class, 'generateAparReport']); 
+        Route::get('part_broken_list', [InspectionController::class, 'precetagePartBroken']);
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
     });
+    Route::prefix('penawaran')->group(function() {
+        Route::get('/', [PenawaranController::class, 'index']);
+    });
+
 });
