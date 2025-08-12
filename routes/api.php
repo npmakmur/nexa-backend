@@ -68,6 +68,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     });
     Route::prefix('penawaran')->group(function() {
         Route::get('/', [PenawaranController::class, 'index']);
+        Route::get('/download_penawaran', [PenawaranController::class, 'ReportPenawaran']);
     });
 
 });

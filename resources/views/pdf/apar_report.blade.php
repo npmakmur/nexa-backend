@@ -25,18 +25,15 @@
                 <th>Barcode</th>
                 <th>Media</th>
                 <th>Kapasitas</th>
-                <th>Kadaluarsa</th>
                 <th>Status</th>
                 <th>QC</th>
                 <th>tanggal_cek</th>
                 <th>lokasi</th>
                 <th>pressure</th>
-                <th>seal</th>
-                <th>hose</th>
-                <th>cylinder</th>
-                <th>head_grip</th>
-                <th>spindle_head</th>
-                <th>hidrotest</th>
+                <th>selang</th>
+                <th>head valve</th>
+                <th>Korosi</th>
+                <th>expired</th>
             </tr>
         </thead>
         <tbody>
@@ -46,22 +43,17 @@
                     <td>{{ $item->kode_barang }}</td>
                     <td>{{ $item->media }}</td>
                     <td>{{ $item->kapasitas }}</td>
-                    <td>{{ $item->kadaluarsa }}</td>
                     <td>{{ $item->status }}</td>
                     <td>{{ $item->qc_name }}</td>
                     <td>{{ $item->tanggal_cek }}</td>
                     <td>{{ $item->lokasi ?? '-' }}</td>
                     <td>
-                        {{ $item->pressure_kondisi }} 
-                        <br>
-                        <img src="{{ public_path('storage/' . $item->pressure_img) }}" width="50">
+                        {{ $item->detail_pressure }} 
                     </td>
-                    <td>{{ $item->seal_kondisi }}</td>
-                    <td>{{ $item->hose_kondisi }}</td>
-                    <td>{{ $item->cylinder_kondisi }}</td>
-                    <td>{{ $item->head_grip_kondisi }}</td>
-                    <td>{{ $item->spindle_head_kondisi }}</td>
-                    <td>{{ $item->hidrotest_kondisi }}</td>
+                    <td>{{ $item->detail_hose }}</td>
+                    <td>{{ $item->detail_head_valve }}</td>
+                    <td>{{ $item->detail_korosi }}</td>
+                    <td>{{ $item->detail_expired }}</td>
                 </tr>
             @endforeach
         </tbody>
