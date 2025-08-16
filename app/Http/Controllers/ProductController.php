@@ -94,7 +94,13 @@ class ProductController extends Controller
             'created_by' => auth()->user()->id,
             'created_at' => now(),
         ]);
-
+        DB::table('tabel_add_qr')->insert([
+            "date" => now(),
+            "count_qr" => count($products),
+            "kode_customer" => auth()->user()->kode_customer,
+            "path_qr" => $pdfPath,
+            "created_at" => now()
+        ]);
         return response()->json([
             'message' => 'Produk berhasil disimpan dan QR code berupa link disertakan dalam PDF.',
             'data' => $products,
@@ -279,5 +285,22 @@ class ProductController extends Controller
             'message' => 'Jumlah APAR yang sudah diinspeksi pada bulan ' . $now->translatedFormat('F') . '.',
             'data' => round($persentase, 2) . '%', 200
         ]);
+    }
+        public function list_qr (Request $request)
+    {
+        $data_qr = DB::table("tabel_add_qr")
+        ->where("kode_customer", auth()->user()->kode_customer)
+        ->get()
+        ->map(function($data){
+            $path_qr = url(Storage::url($data->path_qr));
+            $data->url_qr = $path_qr;
+            return $data;
+        });
+
+        return response()->json([
+            'message' => 'list data qr',
+            'data' => $data_qr
+        ]);
+
     }
 }

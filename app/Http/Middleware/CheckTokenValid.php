@@ -22,9 +22,6 @@ class CheckTokenValid
 
             $request->merge(['auth_user' => $user]);
 
-        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json(['message' => 'Token sudah kedaluwarsa'], 401);
-
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response()->json(['message' => 'Token tidak valid'], 401);
 

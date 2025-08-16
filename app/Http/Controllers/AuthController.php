@@ -83,11 +83,11 @@ class AuthController extends Controller
     public function emailVerifed(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+           'email' => 'required|exists:users,email',
             'verifed_code' => 'required',
         ]);
 
-        $cek = User::where('id', $request->id)
+        $cek = User::where('email', $request->email)
         ->where('akun_aktif',0)
         ->where('code_verifikasi', $request->verifed_code)
         ->first();
