@@ -288,7 +288,6 @@ class ProductController extends Controller
     }
     public function list_qr (Request $request)
     {
-        dd($request);
         $data_qr = DB::table("tabel_add_qr")
         ->where("kode_customer", auth()->user()->kode_customer)
         ->get()
