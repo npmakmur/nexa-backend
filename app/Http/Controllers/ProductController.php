@@ -286,8 +286,9 @@ class ProductController extends Controller
             'data' => round($persentase, 2) . '%', 200
         ]);
     }
-        public function list_qr (Request $request)
+    public function list_qr (Request $request)
     {
+        dd($request);
         $data_qr = DB::table("tabel_add_qr")
         ->where("kode_customer", auth()->user()->kode_customer)
         ->get()
