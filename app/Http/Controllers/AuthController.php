@@ -118,8 +118,7 @@ class AuthController extends Controller
     }
     public function generateCodeVerify(Request $request)
     {
-        $user = User::where('id', $request->id)
-        ->where('akun_aktif', 0)
+        $user = User::where('email', $request->email)
         ->first();
         if (!$user) {
             return response()->json([
@@ -177,8 +176,7 @@ class AuthController extends Controller
             Mail::to($user->email)->send(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             // Mail::to($user->email)->queue(new VerifikasiMail($nama, $code_verifikasi,$teks, $subject));
             return response()->json([
-                'data' => $user,
-                'message' => 'Generate Kode Berhasil',
+                'message' => 'Generate Kode lupa password Berhasil',
             ], 201);
         } else {
             return response()->json(['message' => 'Gagal Membuat Code'], 500);
@@ -187,11 +185,11 @@ class AuthController extends Controller
     public function passVerify(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'email' => 'required|email|exists:users,email',
             'verifed_code' => 'required',
         ]);
-
-        $cek = User::where('id', $request->id)
+        
+        $cek = User::where('email', $request->email)
         ->where('akun_aktif',1)
         ->where('code_verifikasi', $request->verifed_code)
         ->first();
@@ -216,17 +214,20 @@ class AuthController extends Controller
     public function setPassword(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:users,id',
+            'email' => 'required|email|exists:users,email',
             'new_pass' => 'required',
         ]); 
         $newPassword = Hash::make($request->new_pass);
-        $cek = User::where('id', $request->id)
+        $cek = User::where('email', $request->email)
         ->update([
             "password" => $newPassword
         ]);
         if (!$cek) {
             return response()->json(['message' => 'Kode verifikasi salah.'], 404);
         }
+        return response()->json([
+            'message' => 'Password berhasil di ubah'
+        ], 200);
     }
     public function logout(Request $request)
     {
