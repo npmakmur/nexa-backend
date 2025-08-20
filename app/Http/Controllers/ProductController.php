@@ -12,6 +12,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -144,36 +145,53 @@ class ProductController extends Controller
 
     public function update(Request $request)
     {
-        $request->validate([
+        $messages = [
+            'id.required' => 'Field id wajib diisi.',
+            'id.exists' => 'Produk dengan id tersebut tidak ditemukan.',
+            'brand.required' => 'Field brand wajib diisi.',
+            'brand.string' => 'Field brand harus berupa teks.',
+            'brand.max' => 'Field brand maksimal 191 karakter.',
+            'type.string' => 'Field type harus berupa teks.',
+            'type.max' => 'Field type maksimal 191 karakter.',
+            'media.required' => 'Field media wajib diisi.',
+            'media.string' => 'Field media harus berupa teks.',
+            'media.max' => 'Field media maksimal 191 karakter.',
+            'kapasitas.required' => 'Field kapasitas wajib diisi.',
+            'kapasitas.string' => 'Field kapasitas harus berupa teks.',
+            'kapasitas.max' => 'Field kapasitas maksimal 191 karakter.',
+            'tanggal_kadaluarsa.required' => 'Field tanggal kadaluarsa wajib diisi.',
+            'tanggal_kadaluarsa.date' => 'Field tanggal kadaluarsa harus berupa tanggal.',
+            'tanggal_kadaluarsa.after_or_equal' => 'Tanggal kadaluarsa harus setelah atau sama dengan tanggal produksi.',
+            'garansi.string' => 'Field garansi harus berupa teks.',
+            'garansi.max' => 'Field garansi maksimal 191 karakter.',
+            'lokasi.required' => 'Field lokasi wajib diisi.',
+            'lokasi.exists' => 'Lokasi tidak valid.',
+            'titik_penempatan_id.required' => 'Field titik penempatan wajib diisi.',
+        ];
+        $validator = Validator::make($request->all(), [
             'id' => 'required|exists:tabel_produk,id',
-            'deskripsi' => 'nullable|string',
-            'brand' => 'required|string|max:191',
-            'type' => 'nullable|string|max:191',
-            'media' => 'required|string|max:191',
-            'kapasitas' => 'required|string|max:191',
-            'tanggal_produksi' => 'required|date',
-            'tanggal_kadaluarsa' => 'required|date|after_or_equal:tanggal_produksi',
-            'garansi' => 'nullable|string|max:191',
-            'lokasi' => 'required|exists:tabel_gedung,id',
-            'titik_penempatan_id' => 'required'
-        ]);
-
-       $product = Product::find($request->id);
-
-        if ($product) {
-            $product->deskripsi = $request->deskripsi;
-            $product->brand = $request->brand;
-            $product->type = $request->type;
-            $product->media = $request->media;
-            $product->kapasitas = $request->kapasitas;
-            $product->tgl_produksi = $request->tanggal_produksi;
-            $product->tgl_kadaluarsa = $request->tanggal_kadaluarsa;
-            $product->garansi = $request->garansi;
-            $product->lokasi = $request->lokasi;
-            $product->titik_penempatan_id = $request->titik_penempatan_id;
-            $product->updated_at = now();
-            $product->save();
+            'brand' => 'sometimes|string|max:191',
+            'type' => 'sometimes|string|max:191',
+            'media' => 'sometimes|string|max:191',
+            'kapasitas' => 'sometimes|string|max:191',
+            'tgl_produksi' => 'sometimes|date',
+            'tgl_kadaluarsa' => 'sometimes|date|after_or_equal:tgl_produksi',
+            'garansi' => 'sometimes|string|max:191',
+            'lokasi' => 'sometimes|exists:tabel_gedung,id',
+            'titik_penempatan_id' => 'sometimes'
+        ], $messages);        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        
+        $product = Product::find($request->id);
+        $data = $request->except('id');
+        $data['updated_at'] = now();
 
         if (!$product) {
             return response()->json([
@@ -181,9 +199,7 @@ class ProductController extends Controller
                 'message' => 'Tidak ada perubahan atau produk tidak ditemukan.',
             ], 400);
         }
-
-        // Ambil data produk terbaru setelah update
-        $product = DB::table('tabel_produk')->where('id', $request->id)->first();
+        $product->update($data);
 
         // Catat aktivitas
         $now = now();
@@ -199,8 +215,6 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Produk berhasil diperbarui.',
-            'data' => $product,
-            'updated_at' => $now->toDateTimeString(),
         ], 200);
     }
     public function detai_apar(Request $request)
