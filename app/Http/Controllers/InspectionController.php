@@ -413,7 +413,7 @@ class InspectionController extends Controller
     )
     ->get();
     return response()->json([
-        'message' => 'detail inspeksi',
+        'message' => 'detail inspeksi agenda',
         'detail_agenda' => $data,
         'list_apar' =>$apar
     ], 201);
@@ -497,7 +497,7 @@ public function generateAparReport(Request $request)
     ])->setPaper('A3', 'portrait');
 
     // Simpan langsung ke storage/app/public/reports
-    $fileName = 'Laporan_Inspeksi_APAR_' . $data->no_jadwal . '.pdf';
+    $fileName = 'Laporan_Inspeksi_APAR_A1' . str_replace('/', '-', $data->no_jadwal) . '.pdf';
     $filePath = 'reports/' . $fileName;
     Storage::disk('public')->put($filePath, $pdf->output());
 
@@ -506,12 +506,25 @@ public function generateAparReport(Request $request)
 
     return response()->json([
         'message' => 'Laporan berhasil dibuat',
-        'download_url' => $url,
+        'download_url' =>  url('/api/inspection/download/' . $fileName),
+
     ]);
 }
+public function downloadAparReport($file)
+{
+    $filePath = storage_path('app/public/reports/' . $file);
+    if (!file_exists($filePath)) {
+        return response()->json([
+            'status' => false,
+            'message' => 'File tidak ditemukan'
+        ], 404);
+    }
 
-
-
+    return response()->download($filePath, $file, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="' . $file . '"'
+    ]);
+}
 
 public function precetagePartBroken (Request $request)
 {
@@ -532,6 +545,30 @@ public function precetagePartBroken (Request $request)
         'message' => 'Presentasi part sering rusak',
         'data' => $partBroken,
     ],200);
+}
+public function detailInspectionApar (Request $request)
+{
+    $apar = DB::table('tabel_inspection')->where("id_inspection", $request->id_inspection)
+    ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
+    ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_inspection.pressure', '=', 'pressure_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
+    ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
+    ->select(
+        'tabel_inspection.*',
+        'qc_name.name as qc_name',
+        'pressure_kondisi.detail_kondisi as detail_pressure',
+        'hose_kondisi.detail_kondisi as detail_hose',
+        'head_valve_kondisi.detail_kondisi as detail_head_valve',
+        'korosi_kondisi.detail_kondisi as detail_korosi',
+        'expired_kondisi.detail_kondisi as detail_expired'
+    )
+    ->get();
+        return response()->json([
+        'message' => 'detail inspeksi',
+        'list_apar' =>$apar
+    ], 201);
 }
 //  public function updateStatusInspection (Request $request)
 //  {

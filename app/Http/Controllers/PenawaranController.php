@@ -185,15 +185,33 @@ class PenawaranController extends Controller
         ])->setPaper('A4', 'portrait');
 
         // Simpan file ke storage/app/public/reports
-        $fileName = 'Penawaran_APAR_'.$data->no_jadwal.'.pdf';
+        $fileName = 'Penawaran_APAR_' . str_replace('/', '-', $data->no_jadwal) . '.pdf';
         $filePath = 'reports/' . $fileName;
         Storage::disk('public')->put($filePath, $pdf->output());
+        $fileName = base64_encode($fileName);
 
         // Return link download
         return response()->json([
             'status' => true,
             'message' => 'Laporan penawaran berhasil dibuat',
-            'download_url' => asset('storage/' . $filePath)
+            'download_url' =>  url('/api/penawaran/download/' . $fileName)
+        ]);
+    }
+    public function download($file)
+    {
+        $file = base64_decode($file);
+        $filePath = storage_path('app/public/reports/' . $file);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'File tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->download($filePath, $file, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $file . '"'
         ]);
     }
 }

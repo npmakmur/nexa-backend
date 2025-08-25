@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -15,14 +16,43 @@ class CustomerController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'username' => 'required|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'level' => 'required|exists:tabel_level,id',
             'gender' => 'required',
+        ], [
+            'name.required' => 'Nama tidak boleh kosong.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama maksimal 255 karakter.',
+
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah digunakan, pilih yang lain.',
+
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+
+            'level.required' => 'Level wajib dipilih.',
+            'level.exists' => 'Level tidak ditemukan dalam database.',
+
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+
         $user = new User();
         $user->name = $request->name;
         $user->username = $request->username;
@@ -118,9 +148,17 @@ class CustomerController extends Controller
     }
     public function detailUser (Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'id' => 'required|exists:users,id',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
         $user = DB::table('users')
         ->leftJoin('tabel_master_customer', 'users.kode_customer', '=', 'tabel_master_customer.kode_customer')
         ->where('users.id', $request->id)
@@ -130,6 +168,12 @@ class CustomerController extends Controller
             'tabel_master_customer.nama_customer'
         )
         ->first();
+        if (!$user) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'User tidak ditemukan atau akun tidak aktif',
+            ], 404);
+        }
         return response()->json([
             'message' => 'Detail User',
             'data' => $user,

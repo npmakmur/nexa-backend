@@ -18,6 +18,8 @@ Route::post('generate_code', [AuthController::class, 'generateCodeVerify']);
 Route::post('forget_password', [AuthController::class, 'forgetPassword']);
 Route::post('change_password', [AuthController::class, 'passVerify']);
 Route::post('set_password', [AuthController::class, 'setPassword']);
+
+
 Route::middleware([CheckTokenValid::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('customer')->group(function () {
@@ -61,15 +63,19 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::post('do_inspection', [InspectionController::class, 'inspectionApar']); 
         Route::get('list_inspection', [InspectionController::class, 'listInspection']); 
         Route::get('detail_inspection', [InspectionController::class, 'detailInspection']);
+        Route::get('detail_inspection_apar', [InspectionController::class, 'detailInspectionApar']);
         Route::get('list_apar_not_inspected', [InspectionController::class, 'aparNotInspected']); 
         Route::get('list_apar_inspected', [InspectionController::class, 'aparInspected']); 
         Route::post('download_report', [InspectionController::class, 'generateAparReport']); 
         Route::get('part_broken_list', [InspectionController::class, 'precetagePartBroken']);
+        Route::get('download/{file}', [InspectionController::class, 'downloadAparReport']); 
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
     });
     Route::prefix('penawaran')->group(function() {
         Route::get('/', [PenawaranController::class, 'index']);
         Route::get('/download_penawaran', [PenawaranController::class, 'ReportPenawaran']);
+        Route::get('download/{file}', [PenawaranController::class, 'download']);
+
     });
 
 });

@@ -47,7 +47,7 @@ class LokasiController extends Controller
     }
     public function listLokasi (Request $request)
     {
-        $data_location = DB::table("tabel_gedung")->get()
+        $data_location = DB::table("tabel_gedung")->where("kode_customer",auth()->user()->kode_customer)->get()
                         ->map(function($data){
                             $data->location_point = DB::table('tabel_titik_penempatan')->where("gedung_id", $data->id)->get();
                             return $data;
