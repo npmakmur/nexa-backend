@@ -570,6 +570,61 @@ public function detailInspectionApar (Request $request)
         'list_apar' =>$apar
     ], 201);
 }
+public function proggress (Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'id_jadwal'          => 'required',
+    ]);
+    $schedule = DB::table("tabel_header_jadwal")->where("id", $request->id_jadwal)->first();
+    $inspection = DB::table("tabel_inspection")->where("no_jadwal", $schedule->no_jadwal)->pluck("kode_barang");
+    $apar_inspected = Product::WhereIn("kode_barang", $inspection)->get();
+    $count_apar_inspected = count($apar_inspected);
+    $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
+    $filteredApar = $apar->reject(function ($item) use ($inspection) {
+        return $inspection->contains($item->kode_barang);
+    });
+    $count_apar_uninspected = count($filteredApar);
+    return response()->json([
+        'message' => 'proggress inspection',
+        'proggress_inspected' => $count_apar_inspected,
+        'proggress_uninspected' => $count_apar_uninspected
+    ], 201);
+
+}
+public function deleteAparInspection (Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'no_jadwal'          => 'required',
+        'id_inspection' => "required"
+    ]);
+    $jadwal = DB::table("tabel_header_jadwal")
+    ->where("no_jadwal", $request->no_jadwal)
+    ->first();
+    if($jadwal->status == "Selesai"){
+        return response()->json([
+            'message' => 'Agenda sudah selesai, Inspeksi Apar tidak bisa di hapus',
+        ], 201);
+    }
+    $apar_inspection = DB::table("tabel_inspection")
+    ->where("no_jadwal", $request->no_jadwal)
+    ->where("id_inspection", $request->id_inspection)
+    ->first();
+    if ($apar_inspection) {
+         DB::table("tabel_inspection")
+        ->where("no_jadwal", $request->no_jadwal)
+        ->where("id_inspection", $request->id_inspection)
+        ->delete();
+         return response()->json([
+            'status'  => 'success',
+            'message' => 'Data APAR berhasil dihapus'
+        ],201);
+    }else {
+    return response()->json([
+        'status'  => 'error',
+        'message' => 'APAR tidak ditemukan'
+    ], 404);
+}
+}
 //  public function updateStatusInspection (Request $request)
 //  {
 //     $validator = Validator::make($request->all(), [

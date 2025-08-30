@@ -69,6 +69,8 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::post('download_report', [InspectionController::class, 'generateAparReport']); 
         Route::get('part_broken_list', [InspectionController::class, 'precetagePartBroken']);
         Route::get('download/{file}', [InspectionController::class, 'downloadAparReport']); 
+        Route::get('proggress', [InspectionController::class, 'proggress']); 
+        Route::post('delete_inspection', [InspectionController::class, 'deleteAparInspection']); 
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
     });
     Route::prefix('penawaran')->group(function() {
