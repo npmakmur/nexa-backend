@@ -237,7 +237,6 @@ class ProductController extends Controller
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_produk.expired', '=', 'expired_kondisi.id')
 
         ->where('kode_barang', $request->id_barang)
-        ->where('kode_customer',  auth()->user()->kode_customer)
         ->first();
 
         $history = DB::table("tabel_inspection")
