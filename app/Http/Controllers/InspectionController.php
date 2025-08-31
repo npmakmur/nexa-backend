@@ -546,30 +546,60 @@ public function precetagePartBroken (Request $request)
         'data' => $partBroken,
     ],200);
 }
-public function detailInspectionApar (Request $request)
+public function detailInspectionApar(Request $request)
 {
     $apar = DB::table('tabel_inspection')->where("id_inspection", $request->id_inspection)
-    ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
-    ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_inspection.pressure', '=', 'pressure_kondisi.id')
-    ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
-    ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
-    ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
-    ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
-    ->select(
-        'tabel_inspection.*',
-        'qc_name.name as qc_name',
-        'pressure_kondisi.detail_kondisi as detail_pressure',
-        'hose_kondisi.detail_kondisi as detail_hose',
-        'head_valve_kondisi.detail_kondisi as detail_head_valve',
-        'korosi_kondisi.detail_kondisi as detail_korosi',
-        'expired_kondisi.detail_kondisi as detail_expired'
-    )
-    ->get();
-        return response()->json([
+        ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
+        ->leftJoin('tabel_gedung as location', 'location.id', '=', 'produk.lokasi')
+        ->leftJoin('tabel_titik_penempatan as preposition_place', 'preposition_place.id', '=', 'produk.titik_penempatan_id')
+        ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
+        ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_inspection.pressure', '=', 'pressure_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
+        ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
+        ->select(
+            'tabel_inspection.id_inspection',
+            'produk.barcode',
+            'produk.brand',
+            'produk.type',
+            'produk.media',
+            'produk.kapasitas',
+            'produk.tgl_produksi',
+            'produk.berat',
+            'location.nama_gedung',
+            'preposition_place.nama_titik',
+            'tabel_inspection.no_jadwal',
+            'tabel_inspection.pressure_img',
+            'tabel_inspection.hose_img',
+            'tabel_inspection.head_valve_img',
+            'tabel_inspection.expired_img',
+            'tabel_inspection.korosi_img',
+            'qc_name.name as qc_name',
+            'pressure_kondisi.detail_kondisi as detail_pressure',
+            'hose_kondisi.detail_kondisi as detail_hose',
+            'head_valve_kondisi.detail_kondisi as detail_head_valve',
+            'korosi_kondisi.detail_kondisi as detail_korosi',
+            'expired_kondisi.detail_kondisi as detail_expired'
+        )
+        ->get();
+
+    // mapping asset() untuk kolom image
+    $apar = $apar->map(function ($item) {
+        $item->pressure_img = $item->pressure_img ? asset('storage/' . $item->pressure_img) : null;
+        $item->hose_img = $item->hose_img ? asset('storage/' . $item->hose_img) : null;
+        $item->head_valve_img = $item->head_valve_img ? asset('storage/' . $item->head_valve_img) : null;
+        $item->expired_img = $item->expired_img ? asset('storage/' . $item->expired_img) : null;
+        $item->korosi_img = $item->korosi_img ? asset('storage/' . $item->korosi_img) : null;
+        return $item;
+    });
+
+    return response()->json([
         'message' => 'detail inspeksi',
-        'list_apar' =>$apar
+        'list_apar' => $apar
     ], 201);
 }
+
 public function proggress (Request $request)
 {
     $validator = Validator::make($request->all(), [
@@ -618,12 +648,12 @@ public function deleteAparInspection (Request $request)
             'status'  => 'success',
             'message' => 'Data APAR berhasil dihapus'
         ],201);
-    }else {
-    return response()->json([
-        'status'  => 'error',
-        'message' => 'APAR tidak ditemukan'
-    ], 404);
-}
+        }else {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'APAR tidak ditemukan'
+        ], 404);
+    }
 }
 //  public function updateStatusInspection (Request $request)
 //  {
