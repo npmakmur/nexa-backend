@@ -624,19 +624,9 @@ public function proggress (Request $request)
 public function deleteAparInspection (Request $request)
 {
     $validator = Validator::make($request->all(), [
-        'no_jadwal'          => 'required',
         'id_inspection' => "required"
     ]);
-    $jadwal = DB::table("tabel_header_jadwal")
-    ->where("no_jadwal", $request->no_jadwal)
-    ->first();
-    if($jadwal->status == "Selesai"){
-        return response()->json([
-            'message' => 'Agenda sudah selesai, Inspeksi Apar tidak bisa di hapus',
-        ], 201);
-    }
     $apar_inspection = DB::table("tabel_inspection")
-    ->where("no_jadwal", $request->no_jadwal)
     ->where("id_inspection", $request->id_inspection)
     ->first();
     if ($apar_inspection) {
