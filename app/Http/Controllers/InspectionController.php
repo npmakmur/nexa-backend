@@ -195,6 +195,7 @@ class InspectionController extends Controller
     $schedule = DB::table('tabel_header_jadwal')->where("id", $request->id_jadwal)->first();
     $product = DB::table('tabel_produk')->where("kode_barang", $request->kode_barang)->first();
 
+
     // Periksa apakah jadwal dan produk ada
     if (!$schedule || !$product) {
         return response()->json(['message' => 'Jadwal atau Produk tidak ditemukan.'], 404);
@@ -319,6 +320,12 @@ class InspectionController extends Controller
         }
     } else {
         // Buat catatan inspeksi baru
+        $cek_apar_inspected =  DB::table('tabel_inspection')->where("no_jadwal", $request->id_jadwal)->where("kode_barang", $product->kode_barang,)->first();
+        if ($cek_apar_inspected) {
+            return response()->json([
+                'message' => 'apar suda di inspeksi.',
+            ], 400);
+        }
         $inspectionData['no_jadwal'] = $schedule->no_jadwal;
         DB::table('tabel_inspection')->insert($inspectionData);
         $activityMessage = 'Inspeksi APAR baru: ' . $request->kode_barang;
