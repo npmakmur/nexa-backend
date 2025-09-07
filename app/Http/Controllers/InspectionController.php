@@ -381,6 +381,7 @@ class InspectionController extends Controller
    $list = TabelHeaderJadwal::where("tabel_header_jadwal.kode_customer", auth()->user()->kode_customer)
     ->leftJoin('users', 'users.id', '=', 'tabel_header_jadwal.inspeksi_pic')
     ->select('tabel_header_jadwal.*', 'users.name as inspection_name')
+    ->orderBy("id", "desc")
     ->get();
     return response()->json([
         'message' => 'list inspeksi',
@@ -432,7 +433,7 @@ class InspectionController extends Controller
     ]);
     $schedule = DB::table("tabel_header_jadwal")->where("id", $request->id_jadwal)->first();
     $inspection = DB::table("tabel_inspection")->where("no_jadwal", $schedule->no_jadwal)->pluck("kode_barang");
-    $apar = Product::where("kode_customer", auth()->user()->kode_customer)->get();
+    $apar = Product::where("kode_customer", auth()->user()->kode_customer)->orderBy("id", "desc")->get();
     $filteredApar = $apar->reject(function ($item) use ($inspection) {
         return $inspection->contains($item->kode_barang);
     });
@@ -462,6 +463,7 @@ class InspectionController extends Controller
         "tabel_produk.kapasitas",
         "tabel_produk.kode_barang",
     )
+    ->orderBy("id_inspection", "desc")
     ->get();
     return response()->json([
         'message' => 'list inspeksi',

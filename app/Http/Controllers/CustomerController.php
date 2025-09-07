@@ -135,8 +135,10 @@ class CustomerController extends Controller
     }
     public function listUser (Request $request)
     {
-        $query = User::where("kode_customer", auth()->user()->kode_customer)
-                    ->where("akun_aktif", 1);
+       $query = User::where("kode_customer", auth()->user()->kode_customer)
+        ->where("akun_aktif", 1)
+        ->orderByRaw("LEFT(name, 1) ASC")
+        ->get();
         if ($request->filled('id_level')) {
             $query->where('id_level', $request->id_level);
         }

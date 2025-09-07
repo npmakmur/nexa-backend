@@ -119,7 +119,7 @@ class ProductController extends Controller
     }
     public function list_apar(Request $request)
     {
-        $query = Product::where("kode_customer", auth()->user()->kode_customer);
+        $query = Product::where("kode_customer", auth()->user()->kode_customer) ->orderBy("id", "desc");
 
         // Filter berdasarkan lokasi (lokasi)
         if ($request->filled('lokasi')) {
@@ -304,6 +304,7 @@ class ProductController extends Controller
     {
         $data_qr = DB::table("tabel_add_qr")
         ->where("kode_customer", auth()->user()->kode_customer)
+         ->orderBy("id", "desc")
         ->get()
         ->map(function($data){
             $path_qr = url(Storage::url($data->path_qr));
