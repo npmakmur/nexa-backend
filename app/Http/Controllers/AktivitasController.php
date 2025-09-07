@@ -15,6 +15,7 @@ class AktivitasController extends Controller
             ->join('users', 'tabel_aktivitas.aktivitas_by', '=', 'users.id')
             ->where('users.kode_customer', $kodeUserLogin)
             ->select('tabel_aktivitas.*') // bisa tambah kolom lain jika perlu
+            ->orderBy("id", "desc")
             ->get();
 
         return response()->json([

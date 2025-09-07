@@ -280,8 +280,11 @@ class ProductController extends Controller
         if (!$list) {
             return response()->json([
                 'message' => 'Belum ada jadwal inspeksi pada bulan ' . $now->translatedFormat('F') . '.',
-                'data' => '0%', 200
-            ]);
+                'data' => (object)[
+                    'persentase' => '0%',
+                    'count_apar' => $count_apar
+                ]
+            ], 200);
         }
 
         // Jika ada jadwal, ambil data inspeksi
