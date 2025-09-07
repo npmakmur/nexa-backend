@@ -234,7 +234,7 @@ class ProductController extends Controller
         ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_produk.head_valve', '=', 'head_valve_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_produk.korosi', '=', 'korosi_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_produk.expired', '=', 'expired_kondisi.id')
-        ->leftJoin('tabel_gedung as lokasi_name', 'tabel_produk.lokasi', '=', 'tabel_gedung.id')
+        ->leftJoin('tabel_gedung as lokasi_name', 'tabel_produk.lokasi', '=', 'lokasi_name.id')
         ->leftJoin('tabel_titik_penempatan as placement_point', 'tabel_produk.titik_penempatan_id', '=', 'tabel_titik_penempatan.id')
         ->where('kode_barang', $request->id_barang)
         ->first();
