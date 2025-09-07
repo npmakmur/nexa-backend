@@ -219,7 +219,6 @@ class ProductController extends Controller
     }
     public function detail_apar(Request $request)
     {
-        dd("hai");
         $product = Product::select(
             'tabel_produk.*', 
             'pressure_kondisi.detail_kondisi as detail_pressure',
