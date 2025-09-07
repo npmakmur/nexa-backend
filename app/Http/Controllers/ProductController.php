@@ -217,7 +217,7 @@ class ProductController extends Controller
             'message' => 'Produk berhasil diperbarui.',
         ], 200);
     }
-    public function detai_apar(Request $request)
+    public function detail_apar(Request $request)
     {
         $request->validate([
             'kode_barang' => '',
@@ -229,13 +229,16 @@ class ProductController extends Controller
             'head_valve_kondisi.detail_kondisi as detail_head_valve',
             'korosi_kondisi.detail_kondisi as detail_korosi',
             'expired_kondisi.detail_kondisi as detail_expired',
+            'lokasi_name.nama_gedung as building_name',
+            'placement_point.nama_titik as placement_point_name',
         )
         ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_produk.pressure', '=', 'pressure_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_produk.hose', '=', 'hose_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_produk.head_valve', '=', 'head_valve_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_produk.korosi', '=', 'korosi_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_produk.expired', '=', 'expired_kondisi.id')
-
+        ->leftJoin('tabel_gedung as lokasi_name', 'tabel_produk.lokasi', '=', 'tabel_gedung.id')
+        ->leftJoin('tabel_titik_penempatan as placement_point', 'tabel_produk.titik_penempatan_id', '=', 'tabel_titik_penempatan.id')
         ->where('kode_barang', $request->id_barang)
         ->first();
 
