@@ -320,7 +320,7 @@ class InspectionController extends Controller
         }
     } else {
         // Buat catatan inspeksi baru
-        $cek_apar_inspected =  DB::table('tabel_inspection')->where("no_jadwal", $request->id_jadwal)->where("kode_barang", $product->kode_barang,)->first();
+        $cek_apar_inspected =  DB::table('tabel_inspection')->where("no_jadwal", $schedule->no_jadwal)->where("kode_barang", $product->kode_barang,)->first();
         if ($cek_apar_inspected) {
             return response()->json([
                 'message' => 'apar suda di inspeksi.',
