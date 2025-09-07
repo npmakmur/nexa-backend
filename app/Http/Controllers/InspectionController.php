@@ -440,11 +440,25 @@ class InspectionController extends Controller
         'id_jadwal'          => 'required',
     ]);
     $schedule = DB::table("tabel_header_jadwal")->where("id", $request->id_jadwal)->first();
-    $inspection = DB::table("tabel_inspection")->where("no_jadwal", $schedule->no_jadwal)->pluck("kode_barang");
-    $apar = Product::WhereIn("kode_barang", $inspection)->get();
+    $inspection = DB::table("tabel_inspection")
+    ->leftJoin("tabel_produk", "tabel_inspection.kode_barang", "=", "tabel_produk.kode_barang")
+    ->leftJoin("users", "tabel_inspection.qc", "=", "users.id")
+    ->where("tabel_inspection.no_jadwal", $schedule->no_jadwal)
+    ->select(
+        "tabel_inspection.id_inspection",
+        "tabel_inspection.no_jadwal",
+        "tabel_inspection.tanggal_cek",
+        "users.name as inpection_name",
+        "tabel_inspection.status",
+        "tabel_produk.brand",
+        "tabel_produk.type",
+        "tabel_produk.kapasitas",
+        "tabel_produk.kode_barang",
+    )
+    ->get();
     return response()->json([
         'message' => 'list inspeksi',
-        'data_list_apar_inspected' => $apar,
+        'data_list_apar_inspected' => $inspection,
     ], 201);
  }
 public function generateAparReport(Request $request)
