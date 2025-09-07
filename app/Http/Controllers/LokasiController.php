@@ -114,7 +114,7 @@ class LokasiController extends Controller
     public function apiListLocationPoint(Request $request)
     {
         $request->validate([
-            'id' => 'required'
+            'gedung_id' => 'required'
         ]);
         $titik = DB::table('tabel_titik_penempatan')
                     ->where('gedung_id', $request->id)
