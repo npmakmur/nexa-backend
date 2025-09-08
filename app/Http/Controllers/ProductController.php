@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class ProductController extends Controller
 {
@@ -320,5 +321,59 @@ class ProductController extends Controller
             'data' => $data_qr
         ]);
 
+    }
+    public function countAparBroken (Request $request)
+    {
+        $apar = DB::table("tabel_produk")
+            ->where("kode_customer", auth()->user()->kode_customer)
+            ->get()
+            ->map(function($data){
+                $brokenApar = DB::table("tabel_inspection")
+                    ->where("kode_barang", $data->kode_barang)
+                    ->orderByDesc("id_inspection")
+                    ->first();
+
+                $data->last_inspection = $brokenApar; // simpan object inspection
+                return $data;
+            })
+            ->filter(function($data) {
+                return $data->last_inspection 
+                    && $data->last_inspection->status === 'rusak';
+            })
+            ->count();
+
+        return response()->json([
+            'message' => 'jumlah apar rusak',
+            'data' => [
+                "apar_broken" => $apar
+            ]
+        ], 200);
+    }
+    public function listAparBroken (Request $request)
+    {
+        $apar = DB::table("tabel_produk")
+        ->where("kode_customer", auth()->user()->kode_customer)
+        ->get()
+        ->map(function($data) {
+            $brokenApar = DB::table("tabel_inspection")
+                ->where("kode_barang", $data->kode_barang)
+                ->orderByDesc("id_inspection")
+                ->first();
+
+            $data->last_inspection = $brokenApar; // simpan object inspection
+            return $data;
+        })
+        ->filter(function($data) {
+            return $data->last_inspection 
+                && $data->last_inspection->status === 'rusak';
+        })
+        ->values(); // reset index biar rapi
+
+        return response()->json([
+            'message' => 'list data apar rusak',
+            'data' => [
+                "apar_broken" => $apar
+            ]
+        ], 200);
     }
 }

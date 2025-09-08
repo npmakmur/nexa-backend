@@ -32,10 +32,12 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         // Route::get('/', [CustomerController::class, 'index']);        // GET /customer
         Route::post('add_customer', [CustomerController::class, 'store']);
         Route::post('update', [CustomerController::class, 'update']);
+        Route::post('update_foto_profile', [CustomerController::class, 'updateFotoProfile']);
         Route::get('list_user', [CustomerController::class, 'listUser']);
         Route::get('detail_user', [CustomerController::class, 'detailUser']);
         Route::delete('delete_user', [CustomerController::class, 'destroy']); 
         Route::get('count_user', [CustomerController::class, 'countUser']); 
+        Route::get('list_level', [CustomerController::class, 'listLevelUser']); 
     });
      Route::prefix('location')->group(function () {
         Route::post('/create', [LokasiController::class, 'storeGedung']);
@@ -58,6 +60,8 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('apar_done_permount', [ProductController::class, 'apar_done_permount']); 
         Route::post('update_apar', [ProductController::class, 'update']); 
         Route::get('list_qr_apar', [ProductController::class, 'list_qr']); 
+        Route::get('count_apar_broken', [ProductController::class, 'countAparBroken']); 
+        Route::get('list_apar_broken', [ProductController::class, 'listAparBroken']); 
     });
     Route::prefix('inspection')->group(function() {
         Route::post('add_inspection', [InspectionController::class, 'store']); 

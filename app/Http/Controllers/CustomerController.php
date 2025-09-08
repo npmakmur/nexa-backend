@@ -133,6 +133,52 @@ class CustomerController extends Controller
             'data' => $user,
         ], 200);
     }
+    public function updateFotoProfile(Request $request)
+    {
+        $user = User::find($request->id);
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        $request->validate([
+            'foto_profile' => 'required|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
+        ]);
+
+        if ($request->hasFile('foto_profile')) {
+            // Hapus foto lama jika ada
+            if ($user->image && Storage::disk('public')->exists($user->image)) {
+                Storage::disk('public')->delete($user->image);
+            }
+
+            $file = $request->file('foto_profile');
+            $extension = $file->getClientOriginalExtension();
+            // Buat nama unik: userID_timestamp.ext
+            $filename = 'foto_' . $user->id . '_' . time() . '.' . $extension;
+
+            // Simpan di folder 'public/foto_profil'
+            $path = $file->storeAs('foto_profil', $filename, 'public');
+
+            // Simpan path ke database
+            $user->image = $path;
+            $user->updated_by = auth()->user()->id;
+            $user->save();
+        }
+
+        // Simpan log aktivitas
+        Aktivitas::create([
+            'aktivitas_by' => auth()->user()->id,
+            'aktivitas_name' => 'Memperbarui foto profil user dengan id : ' . $user->id,
+            'tanggal' => now(),
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui',
+            'data' => $user,
+        ], 200);
+    }
+
     public function listUser (Request $request)
     {
       $query = User::where("users.kode_customer", auth()->user()->kode_customer)
@@ -230,6 +276,14 @@ class CustomerController extends Controller
         return response()->json([
             'message' => 'Jumlah user aktif per level',
             'data' => $userLevels,
+        ], 200);
+    }
+    public function listLevelUser (Request $request)
+    {
+        $level = DB::table("tabel_level")->get();
+         return response()->json([
+            'message' => 'Data level',
+            'data' => $level,
         ], 200);
     }
 }
