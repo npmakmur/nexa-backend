@@ -18,6 +18,12 @@ Route::post('generate_code', [AuthController::class, 'generateCodeVerify']);
 Route::post('forget_password', [AuthController::class, 'forgetPassword']);
 Route::post('change_password', [AuthController::class, 'passVerify']);
 Route::post('set_password', [AuthController::class, 'setPassword']);
+Route::get('inspection/download/{file}', [InspectionController::class, 'downloadAparReport']); 
+Route::get('penawaran/download/{file}', [PenawaranController::class, 'download']);
+Route::get('product/detail_apar', [ProductController::class, 'detail_apar']); 
+
+
+
 
 
 Route::middleware([CheckTokenValid::class])->group(function () {
@@ -51,7 +57,6 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('list_apar', [ProductController::class, 'list_apar']); 
         Route::get('apar_done_permount', [ProductController::class, 'apar_done_permount']); 
         Route::post('update_apar', [ProductController::class, 'update']); 
-        Route::get('detail_apar', [ProductController::class, 'detail_apar']); 
         Route::get('list_qr_apar', [ProductController::class, 'list_qr']); 
     });
     Route::prefix('inspection')->group(function() {
@@ -68,7 +73,6 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('list_apar_inspected', [InspectionController::class, 'aparInspected']); 
         Route::post('download_report', [InspectionController::class, 'generateAparReport']); 
         Route::get('part_broken_list', [InspectionController::class, 'precetagePartBroken']);
-        Route::get('download/{file}', [InspectionController::class, 'downloadAparReport']); 
         Route::get('proggress', [InspectionController::class, 'proggress']); 
         Route::post('delete_inspection', [InspectionController::class, 'deleteAparInspection']); 
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
@@ -76,8 +80,6 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     Route::prefix('penawaran')->group(function() {
         Route::get('/', [PenawaranController::class, 'index']);
         Route::get('/download_penawaran', [PenawaranController::class, 'ReportPenawaran']);
-        Route::get('download/{file}', [PenawaranController::class, 'download']);
-
     });
 
 });

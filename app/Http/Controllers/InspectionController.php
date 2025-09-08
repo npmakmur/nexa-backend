@@ -458,10 +458,7 @@ class InspectionController extends Controller
         "tabel_inspection.tanggal_cek",
         "users.name as inpection_name",
         "tabel_inspection.status",
-        "tabel_produk.brand",
-        "tabel_produk.type",
-        "tabel_produk.kapasitas",
-        "tabel_produk.kode_barang",
+        "tabel_produk.*",
     )
     ->orderBy("id_inspection", "desc")
     ->get();
@@ -654,7 +651,6 @@ public function deleteAparInspection (Request $request)
     ->first();
     if ($apar_inspection) {
          DB::table("tabel_inspection")
-        ->where("no_jadwal", $request->no_jadwal)
         ->where("id_inspection", $request->id_inspection)
         ->delete();
          return response()->json([

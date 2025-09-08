@@ -135,10 +135,14 @@ class CustomerController extends Controller
     }
     public function listUser (Request $request)
     {
-       $query = User::where("kode_customer", auth()->user()->kode_customer)
-        ->where("akun_aktif", 1)
-        ->orderByRaw("LEFT(name, 1) ASC")
-        ->get();
+      $query = User::where("users.kode_customer", auth()->user()->kode_customer)
+        ->where("users.akun_aktif", 1)
+        ->leftJoin('tabel_level', 'users.id_level', '=', 'tabel_level.id')
+        ->select(
+            "users.*",
+            "tabel_level.nama_level"
+        )
+        ->orderByRaw("LEFT(name, 1) ASC");
         if ($request->filled('id_level')) {
             $query->where('id_level', $request->id_level);
         }
@@ -163,11 +167,13 @@ class CustomerController extends Controller
         }
         $user = DB::table('users')
         ->leftJoin('tabel_master_customer', 'users.kode_customer', '=', 'tabel_master_customer.kode_customer')
+         ->leftJoin('tabel_level', 'users.id_level', '=', 'tabel_level.id')
         ->where('users.id', $request->id)
         ->where('users.akun_aktif', 1)
         ->select(
             'users.*',
-            'tabel_master_customer.nama_customer'
+            'tabel_master_customer.nama_customer',
+             "tabel_level.nama_level"
         )
         ->first();
         if (!$user) {

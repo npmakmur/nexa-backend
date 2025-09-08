@@ -117,8 +117,7 @@ class LokasiController extends Controller
             'gedung_id' => 'required'
         ]);
         $titik = DB::table('tabel_titik_penempatan')
-                    ->where('gedung_id', $request->id)
-                    ->select('id', 'nama_titik')
+                    ->where('gedung_id', $request->gedung_id)
                     ->orderBy('id', 'desc')
                     ->get();
 
