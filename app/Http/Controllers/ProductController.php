@@ -136,7 +136,13 @@ class ProductController extends Controller
             });
         }
 
-        $apar = $query->get();
+        $apar = $query->get()->map(function($item){
+            $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
+            $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id",$item->titik_penempatan_id)->first();
+            $item->lokasi = $lokasi->nama_gedung ?? null;
+            $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
+            return $item;
+        });
 
         return response()->json([
             'message' => 'List APAR berhasil didapatkan.',

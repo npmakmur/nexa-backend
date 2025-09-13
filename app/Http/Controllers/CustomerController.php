@@ -117,7 +117,7 @@ class CustomerController extends Controller
             $path =  $file->storeAs('foto_profil', $filename, 'public');
 
             // Simpan path ke database
-            $user->image = $path;
+            $user->image = asset('storage/' . $path);
         }
         $user->save();
         $aktivitas = Aktivitas::create([
@@ -159,7 +159,7 @@ class CustomerController extends Controller
             $path = $file->storeAs('foto_profil', $filename, 'public');
 
             // Simpan path ke database
-            $user->image = $path;
+            $user->image = asset('storage/' . $path);
             $user->updated_by = auth()->user()->id;
             $user->save();
         }
