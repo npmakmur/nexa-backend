@@ -548,19 +548,43 @@ public function downloadAparReport($file)
 
 public function precetagePartBroken (Request $request)
 {
-    $all_inspek = DB::table('tabel_inspection')->where('kode_customer', auth()->user()->kode_customer)->count();
+    $partBrokenCount = DB::table('partbroken_summary')
+    ->where("kode_customer", auth()->user()->kode_customer)
+    ->sum('total_rusak');
+
     $partBroken = DB::table('partbroken_summary')
     ->where('kode_customer', auth()->user()->kode_customer)
     ->get()
-    ->map(function ($data) use ($all_inspek) {
-        $totalPartBroken = $data->total_rusak;
-         $percentage = $all_inspek > 0 
-            ? round(($totalPartBroken / $all_inspek) * 100, 2) 
+    ->map(function ($data) use ($partBrokenCount) {
+        $raw_percentage = $partBrokenCount > 0 
+            ? ($data->total_rusak / $partBrokenCount) * 100 
             : 0;
-        $data->persentase_rusak = $percentage;
 
+        // Simpan nilai bulat & desimal
+        $data->persentase_rusak = floor($raw_percentage);
         return $data;
     });
+
+// Hitung total
+    $total = $partBroken->sum('persentase_rusak');
+
+// Kalau masih kurang dari 100, tambahkan ke yang fraction terbesar
+    if ($total < 100) {
+        $difference = 100 - $total;
+        $partBroken = $partBroken->sortByDesc('fraction')->values();
+        for ($i = 0; $i < $difference; $i++) {
+            $partBroken[$i]->persentase_rusak++;
+        }
+    }
+// Kalau lebih dari 100, kurangi dari yang fraction terkecil
+    elseif ($total > 100) {
+        $difference = $total - 100;
+        $partBroken = $partBroken->sortBy('fraction')->values();
+        for ($i = 0; $i < $difference; $i++) {
+            $partBroken[$i]->persentase_rusak--;
+        }
+    }
+
     return response()->json([
         'message' => 'Presentasi part sering rusak',
         'data' => $partBroken,
