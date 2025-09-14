@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -188,7 +189,7 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users,email',
             'verifed_code' => 'required',
         ]);
-        
+        $token = Str::random(60);
         $cek = User::where('email', $request->email)
         ->where('akun_aktif',1)
         ->where('code_verifikasi', $request->verifed_code)
@@ -202,6 +203,8 @@ class AuthController extends Controller
         if ($kodeDibuat->diffInMinutes($sekarang) > 5) {
             return response()->json(['message' => 'Kode sudah kadaluarsa.'], 410);
         }
+        $cek->reset_token = hash('sha256', $token); 
+        $cek->reset_token_expired = now()->addMinutes(1); 
         $cek->code_verifikasi = null;  
         $cek->updated_at = now(); 
         $cek->save();
@@ -215,20 +218,33 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'new_pass' => 'required',
+            'reset_token' => 'required',
+            'new_pass' => 'required|min:6', // bisa pakai confirmed kalau ada konfirmasi password
         ]); 
-        $newPassword = Hash::make($request->new_pass);
-        $cek = User::where('email', $request->email)
-        ->update([
-            "password" => $newPassword
-        ]);
-        if (!$cek) {
-            return response()->json(['message' => 'Kode verifikasi salah.'], 404);
+
+        $user = User::where('email', $request->email)
+            ->where('reset_token', $request->reset_token)
+            ->where('reset_token_expired', '>', now()) // pastikan token belum kadaluarsa
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Token tidak valid atau sudah kadaluarsa.'
+            ], 400);
         }
+
+        // Update password baru
+        $user->password = Hash::make($request->new_pass);
+        $user->reset_token = null; // kosongkan token setelah dipakai
+        $user->reset_token_expired = null;
+        $user->save();
+
         return response()->json([
-            'message' => 'Password berhasil di ubah'
+            'status' => 'success',
+            'message' => 'Password berhasil diubah.'
         ], 200);
     }
+
     public function logout(Request $request)
     {
         try {

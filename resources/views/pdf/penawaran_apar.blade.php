@@ -55,30 +55,114 @@
             font-size: 14px;
             font-weight: bold;
         }
+        
+        .summary-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .terms-conditions {
+            width: 60%;
+            padding-right: 20px;
+        }
+        .amount-summary {
+            width: 40%;
+        }
+        .amount-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 15px;
+        }
+        .amount-label {
+            font-weight: normal;
+        }
+        .amount-value {
+            font-weight: bold;
+        }
+        .total-row {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .total-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+        }
+        .bank-details {
+            width: 50%; /* Adjusted for better balance */
+        }
+        .signature {
+            width: 50%; /* Adjusted for better balance */
+            text-align: center; /* Centered the signature within its div */
+        }
+        .signature img {
+            max-width: 150px;
+            height: auto;
+            display: block; /* Make image a block element to center with margin auto */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .signature p {
+            margin-top: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="header-section">
-
-       <img src="../public/surat/header.png" alt="hai">
+       <img src="{{ asset('surat/header.png') }}" width="100%" alt="">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <table style="border: none; width: 100%;">
+                    <tr>
+                        <td style="border: none; padding: 4px;">Quotation From</td>
+                        <td style="border: none; padding: 4px;">Quotation For</td>
+                        <td style="border: none; padding: 4px;">Details</td>
+                    </tr>
+                    <tr>
+                        <td style="border: none; padding: 4px;">PT. Tan Anugrah Sejahtera</td>
+                        <td style="border: none; padding: 4px;">{{ $customer->nama_customer }}</td>
+                        <td style="border: none; padding: 4px;"><span>Quotation No # </span>TAS-XII-Q00797</td>
+                    </tr>
+                    <tr>
+                        <td style="border: none; padding: 4px;">Semarang, Indonesia</td>
+                        <td style="border: none; padding: 4px;">Indonesia</td>
+                        <td style="border: none; padding: 4px;"><span>Quotation Date </span>{{ \Carbon\Carbon::now()->format('M d, Y') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div class="info-section">
-        <p class="info"><strong>No Jadwal:</strong> {{ $data->no_jadwal }}</p>
-        <p class="info"><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($data->created_at)->format('d/m/Y') }}</p>
-        <p class="info"><strong>PIC Inspeksi:</strong> {{ $data->inspection_name }}</p>
-        <p class="info"><strong>Dibuat oleh:</strong> {{ $data->created_name }}</p>
-    </div>
+    @php
+        $subtotal_all_items = collect($list_penawaran)->sum('subtotal'); 
+        $ppn_amount = $subtotal_all_items * 0.11;
+        $grand_total = $subtotal_all_items + $ppn_amount;
+    @endphp
     
     <table>
         <thead>
             <tr>
                 <th>No</th>
-                <th>Part</th>
-                <th>Kondisi</th>
+                <th>Item</th>
                 <th>Qty</th>
-                <th>Harga Satuan (Rp)</th>
-                <th>Subtotal (Rp)</th>
+                <th>Rate</th>
+                <th>Amount</th>
+                <th>PPN Rate</th>
             </tr>
         </thead>
         <tbody>
@@ -86,19 +170,50 @@
             <tr>
                 <td>{{ $i+1 }}</td>
                 <td>{{ $item['part'] }}</td>
-                <td>{{ $item['kondisi'] }}</td>
                 <td>{{ $item['qty'] }}</td>
                 <td>{{ number_format($item['harga'], 0, ',', '.') }}</td>
                 <td>{{ number_format($item['subtotal'], 0, ',', '.') }}</td>
+                <td>11%</td>
             </tr>
             @endforeach
         </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="5">TOTAL</th>
-                <th class="total-cell">{{ number_format($total, 0, ',', '.') }}</th>
-            </tr>
-        </tfoot>
     </table>
+
+    <div class="summary-container">
+        <div class="terms-conditions">
+            <h3>Terms and Conditions</h3>
+            <p>Franco : Jakarta</p>
+            <p>Pembayaran : CBD</p>
+            <p>Validasi Penawaran : 7 Hari Kerja</p>
+            <p>Stok tidak terikat</p>
+        </div>
+        <div class="amount-summary">
+            <div class="amount-row">
+                <span class="amount-label">Amount</span>
+                <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
+            </div>
+            <div class="amount-row">
+                <span class="amount-label">PPN</span>
+                <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
+            </div>
+            <div class="total-row">
+                <span class="total-label">Total (IDR)</span>
+                <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="signature-section">
+        <div class="bank-details">
+            <h3>Bank Details</h3>
+            <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
+            <p><strong>Account Number</strong>: 2460623530</p>
+            <p><strong>Bank</strong>: BCA</p>
+        </div>
+        <div class="signature">
+            <img src="{{ asset('surat/signature.png') }}" alt="Signature">
+            <p>Tristan</p>
+        </div>
+    </div>
 </body>
 </html>
