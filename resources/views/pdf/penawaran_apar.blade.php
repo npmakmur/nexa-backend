@@ -211,6 +211,7 @@
             <p><strong>Bank</strong>: BCA</p>
         </div>
         <div class="signature">
+            <p>{{ asset('surat/signature.png') }}</p>
             <img src="{{ asset('surat/signature.png') }}" alt="Signature">
             <p>Tristan</p>
         </div>
