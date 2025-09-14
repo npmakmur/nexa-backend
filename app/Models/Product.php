@@ -28,7 +28,8 @@ class Product extends Model
         'last_refill',
         'last_inspection',
         'lokasi_id',
-        'titik_penempatan_id'
+        'titik_penempatan_id',
+        'batch'
     ];
 
     protected $dates = [

@@ -286,4 +286,12 @@ class CustomerController extends Controller
             'data' => $level,
         ], 200);
     }
+    public function listKodeCustomer (Request $request)
+    {
+        $tabel_master_customer = DB::table("tabel_master_customer")->get();
+         return response()->json([
+            'message' => 'Data list kode customer',
+            'data' => $tabel_master_customer,
+        ], 200);
+    }
 }

@@ -95,10 +95,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'Kode verifikasi salah.'], 404);
         }
         
-        // Cek apakah sudah lebih dari 5 menit
+        // Cek apakah sudah lebih dari 1 menit
         $kodeDibuat = Carbon::parse($cek->email_verified_at);
         $sekarang = Carbon::now();
-        if ($kodeDibuat->diffInMinutes($sekarang) > 5) {
+        if ($kodeDibuat->diffInMinutes($sekarang) > 1) {
             return response()->json(['message' => 'Kode verifikasi sudah kadaluarsa.'], 410);
         }
         $cek->email_verified_at = now(); 

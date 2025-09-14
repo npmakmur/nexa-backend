@@ -14,6 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Symfony\Component\Uid\NilUlid;
+
+use function PHPSTORM_META\map;
 
 class ProductController extends Controller
 {
@@ -108,6 +111,147 @@ class ProductController extends Controller
             'data' => $products,
             'pdf_download_url' => url(Storage::url($pdfPath)),
         ]);
+    }
+    public function storeSuperAdmin(Request $request)
+    {
+        $request->validate([
+            'deskripsi' => 'nullable|string',
+            'brand' => 'required|string|max:191',
+            'type' => 'nullable|string|max:191',
+            'media' => 'required|string|max:191',
+            'kapasitas' => 'required|string|max:191',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_produksi'     => 'required|date',
+            'tanggal_kadaluarsa'   => 'required|date|after_or_equal:tanggal_produksi',
+        ]);
+
+        $jumlah = $request->jumlah;
+        $products = [];
+        $qrCodes = [];
+
+        // Ambil base URL QR dari env, fallback ke APP_URL/product
+        $baseUrl = env('QR_BASE_URL', config('app.url') . '/product');
+        $batchNumber = "BATCH-" . date('YmdHis') . rand(100,999);
+
+        for ($i = 0; $i < $jumlah; $i++) {
+            $product = Product::create([
+                'kode_barang' => 'temporary',
+                'barcode' => 'temporary',
+                'deskripsi' => $request->deskripsi,
+                'brand' => $request->brand,
+                'type' => $request->type,
+                'media' => $request->media,
+                'kapasitas' => $request->kapasitas,
+                'tgl_produksi' => $request->tanggal_produksi,
+                'tgl_kadaluarsa' => $request->tanggal_kadaluarsa,
+                'garansi' => $request->garansi,
+                'lokasi' => $request->lokasi,
+                'batch' => $batchNumber,
+                'kode_customer' => $request->kode_customer ?? null,
+            ]);
+
+            $kodeUnik = 'PROD-' . str_pad($product->id, 6, '0', STR_PAD_LEFT);
+            $linkQRCode = $baseUrl . '/' . $kodeUnik;
+
+            // Generate PNG QR code dari link
+            $qrImage = Builder::create()
+                ->writer(new PngWriter())
+                ->data($linkQRCode)
+                ->size(300)
+                ->margin(10)
+                ->build();
+
+            $qrPath = 'qrcodes/' . $kodeUnik . '.png';
+            Storage::disk('public')->put($qrPath, $qrImage->getString());
+
+            // Update barcode dan kode_barang
+            
+            $product->update([
+                'barcode' => $linkQRCode,
+                'kode_barang' => $kodeUnik,
+            ]);
+
+            $products[] = $product;
+
+            $qrCodes[] = [
+                'barcode' => $kodeUnik,
+                'link' => $linkQRCode,
+                'path' => $qrPath,
+            ];
+        }
+
+        // Buat PDF berisi semua QR code
+        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes]);
+        $pdfFileName = 'all_qr_codes_' . now()->format('Ymd_His') . '.pdf';
+        $pdfPath = 'qrcodes_pdf/' . $pdfFileName;
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+
+        // Simpan aktivitas
+        Aktivitas::create([
+            'aktivitas_by' => auth()->user()->id,
+            'aktivitas_name' => 'Menambahkan apar',
+            'tanggal' => now(),
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+        ]);
+
+        DB::table('tabel_add_qr')->insert([
+            "date" => now(),
+            "count_qr" => count($products),
+            "kode_customer" =>  $request->kode_customer ?? null,
+            "path_qr" => $pdfPath,
+            "created_at" => now()
+        ]);
+        return response()->json([
+            'message' => 'Produk berhasil disimpan dan QR code berupa link disertakan dalam PDF.',
+            'data' => $products,
+            'pdf_download_url' => url(Storage::url($pdfPath)),
+        ]);
+    }
+    public function getAparSuperAdmin(Request $request)
+    {
+        $apar = Product::where("kode_customer", null) 
+            ->orderBy("id", "desc")
+            ->get() // Panggil get() untuk mengeksekusi query dan mendapatkan koleksi
+            ->map(function($item){
+                $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
+                $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id",$item->titik_penempatan_id)->first();
+                
+                $item->lokasi = $lokasi->nama_gedung ?? null;
+                $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
+                
+            return $item;
+        })
+        ->groupBy('batch');
+
+        return response()->json([
+            'message' => 'List APAR Super Admin.',
+            'list_apar' => $apar,
+        ], 200);
+    }
+    public function updateCustomerCodeByBatch(Request $request)
+    {
+        $request->validate([
+            'batch' => 'required|string',
+            'kode_customer' => 'required|string',
+        ]);
+
+        $batchToUpdate = $request->input('batch');
+        $newCustomerCode = $request->input('kode_customer');
+
+        // Ambil data APAR berdasarkan batch
+        $apar = Product::where('batch', $batchToUpdate)
+                        ->get()
+                        ->groupBy('batch');
+
+        $affectedRows = Product::where('batch', $batchToUpdate)
+                               ->update(['kode_customer' => $newCustomerCode]);
+
+
+        return response()->json([
+            'message' => 'Kode customer berhasil diperbarui untuk ' . $affectedRows . ' record.',
+            'list_apar' => $affectedRows,
+        ], 200);
     }
     public function count_apar (Request $request)
     {
@@ -382,4 +526,103 @@ class ProductController extends Controller
             ]
         ], 200);
     }
+
+    public function countApatInspection(Request $request)
+    {
+        $apar = DB::table("tabel_inspection")
+            ->where("kode_customer", auth()->user()->kode_customer)
+            ->pluck("kode_barang");
+
+        $countInspection = DB::table("tabel_inspection")
+            ->whereIn("kode_barang", $apar)
+            ->select("kode_barang", DB::raw("COUNT(*) as total"))
+            ->groupBy("kode_barang")
+            ->get();
+        $count = count($countInspection);
+
+        return response()->json([
+            'message' => 'Total apar yang telah diinspeksi',
+            'data' => [
+                "totalAparInspection" => $count
+            ]
+        ], 200);
+    }
+
+    public function presentaseInspectionDone (Request $request)
+    {
+      $data = DB::table("tabel_inspection")
+        ->where("kode_customer", auth()->user()->kode_customer)
+        ->where("status", '!=', 'rusak')
+        ->count();
+
+        $totalInspection = DB::table("tabel_inspection")
+            ->where("kode_customer", auth()->user()->kode_customer)
+            ->count();
+
+        $percentageNotRusak = $totalInspection > 0 
+            ? min(100, round(($data / $totalInspection) * 100, 2)) 
+            : 0;
+
+        $percentageRusak = $totalInspection > 0 
+            ? min(100, round((($totalInspection - $data) / $totalInspection) * 100, 2)) 
+            : 0;
+
+        return response()->json([
+            'message' => 'Persentase inspection',
+            'data' => [
+                'totalInspection'    => $totalInspection,
+                'totalNotRusak'      => $data,
+                'totalRusak'         => $totalInspection - $data,
+                'percentageNotRusak' => $percentageNotRusak,
+                'percentageRusak'    => $percentageRusak
+            ]
+        ], 200);
+
+    }
+    public function list_apar_pdf(Request $request)
+    {
+        $query = Product::where("kode_customer", auth()->user()->kode_customer) ->orderBy("id", "desc");
+        $apar = $query->get()->map(function($item){
+            $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
+            $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id",$item->titik_penempatan_id)->first();
+            $item->lokasi = $lokasi->nama_gedung ?? null;
+            $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
+            $kondisi_pressure = DB::table("tabel_detail_kondisi")->where("id", $item->pressure)->first();
+            $kondisi_hose = DB::table("tabel_detail_kondisi")->where("id", $item->hose)->first();
+            $kondisi_head_valve = DB::table("tabel_detail_kondisi")->where("id", $item->head_valve)->first();
+            $kondisi_korosi = DB::table("tabel_detail_kondisi")->where("id", $item->korosi)->first();
+            $kondisi_expired = DB::table("tabel_detail_kondisi")->where("id", $item->expired)->first();
+            $apar_status = DB::table("tabel_inspection")
+                ->where("kode_barang", $item->kode_barang)
+                ->orderBy("id_inspection", "desc")
+                ->first();
+            $item->pressure = $kondisi_pressure->detail_kondisi ?? null;
+            $item->hose = $kondisi_hose->detail_kondisi ?? null;
+            $item->head_valve = $kondisi_head_valve->detail_kondisi ?? null;
+            $item->korosi = $kondisi_korosi->detail_kondisi ?? null;
+            $item->expired = $kondisi_expired->detail_kondisi ?? null;
+            $item->status = $apar_status->status ?? null;
+            return $item;
+        });
+
+        $pdf = Pdf::loadView('pdf.report_list_apar', [
+        'apar' => $apar
+        ])->setPaper('A3', 'portrait');
+        $customer_name = DB::table('tabel_master_customer')->where("kode_customer", auth()->user()->kode_customer)->first();
+
+        // Simpan langsung ke storage/app/public/reports
+        $fileName = 'Laporan Apar' . str_replace('/', '-', $customer_name->nama_customer) . '.pdf';
+        $filePath = 'reports/' . $fileName;
+        Storage::disk('public')->put($filePath, $pdf->output());
+
+        // Buat URL publik untuk unduh
+        $url = asset('storage/' . $filePath);
+
+        return response()->json([
+            'message' => 'Laporan berhasil dibuat',
+            'download_url' =>  url('/api/inspection/download/' . $fileName),
+
+        ]);
+    }
+
 }

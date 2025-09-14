@@ -2,21 +2,74 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        table, th, td { border: 1px solid black; }
-        th, td { padding: 6px; text-align: left; }
-        .title { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12px; 
+            line-height: 1.5;
+        }
+        .header-section {
+            margin-bottom: 20px;
+        }
+        .title { 
+            text-align: center; 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .info {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+        }
+        table, th, td { 
+            border: 1px solid #ddd; 
+        }
+        th, td { 
+            padding: 10px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+            font-weight: bold;
+            color: #333;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tfoot th {
+            text-align: right;
+            background-color: #e0e0e0;
+            font-size: 14px;
+        }
+        .total-cell {
+            font-size: 14px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div class="title">LAPORAN PENAWARAN PERBAIKAN PART APAR</div>
+    <div class="header-section">
 
-    <p><strong>No Jadwal:</strong> {{ $data->no_jadwal }}</p>
-    <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($data->created_at)->format('d/m/Y') }}</p>
-    <p><strong>PIC Inspeksi:</strong> {{ $data->inspection_name }}</p>
-    <p><strong>Dibuat oleh:</strong> {{ $data->created_name }}</p>
+       <img src="../public/surat/header.png" alt="hai">
+    </div>
 
+    <div class="info-section">
+        <p class="info"><strong>No Jadwal:</strong> {{ $data->no_jadwal }}</p>
+        <p class="info"><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($data->created_at)->format('d/m/Y') }}</p>
+        <p class="info"><strong>PIC Inspeksi:</strong> {{ $data->inspection_name }}</p>
+        <p class="info"><strong>Dibuat oleh:</strong> {{ $data->created_name }}</p>
+    </div>
+    
     <table>
         <thead>
             <tr>
@@ -42,8 +95,8 @@
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="5" style="text-align:right;">TOTAL</th>
-                <th>{{ number_format($total, 0, ',', '.') }}</th>
+                <th colspan="5">TOTAL</th>
+                <th class="total-cell">{{ number_format($total, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

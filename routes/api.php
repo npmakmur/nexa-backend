@@ -38,6 +38,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::delete('delete_user', [CustomerController::class, 'destroy']); 
         Route::get('count_user', [CustomerController::class, 'countUser']); 
         Route::get('list_level', [CustomerController::class, 'listLevelUser']); 
+        Route::get('kode_customer_list', [CustomerController::class, 'listKodeCustomer']); 
     });
      Route::prefix('location')->group(function () {
         Route::post('/create', [LokasiController::class, 'storeGedung']);
@@ -55,12 +56,18 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     });
     Route::prefix('product')->group(function() {
         Route::post('add_product', [ProductController::class, 'store']); 
+        Route::post('add_product_super_admin', [ProductController::class, 'storeSuperAdmin']); 
+        Route::post('update_produk_super_admin', [ProductController::class, 'updateCustomerCodeByBatch']); 
+        Route::get('list_apar_super_admin', [ProductController::class, 'getAparSuperAdmin']); 
         Route::get('count_apar', [ProductController::class, 'count_apar']); 
         Route::get('list_apar', [ProductController::class, 'list_apar']); 
         Route::get('apar_done_permount', [ProductController::class, 'apar_done_permount']); 
         Route::post('update_apar', [ProductController::class, 'update']); 
         Route::get('list_qr_apar', [ProductController::class, 'list_qr']); 
         Route::get('count_apar_broken', [ProductController::class, 'countAparBroken']); 
+        Route::get('count_apar_inspection', [ProductController::class, 'countApatInspection']); 
+        Route::get('count_apar_inspection_done', [ProductController::class, 'presentaseInspectionDone']); 
+        Route::get('apar_pdf', [ProductController::class, 'list_apar_pdf']); 
         Route::get('list_apar_broken', [ProductController::class, 'listAparBroken']); 
     });
     Route::prefix('inspection')->group(function() {
