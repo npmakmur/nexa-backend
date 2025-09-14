@@ -688,6 +688,27 @@ public function deleteAparInspection (Request $request)
         ], 404);
     }
 }
+public function lastInspection()
+{
+    $id = auth()->user()->id;
+    $inspection = DB::table("tabel_inspection")->where("qc",$id)
+    ->orderBy("id_inspection", "desc") // Urutkan dari ID terbesar ke terkecil
+    ->limit(3) // Ambil 3 data teratas
+    ->get()
+    ->map(function($item){
+        $produk = DB::table("tabel_produk")->where("kode_barang", $item->kode_barang)->first();
+        $location = DB::table("tabel_gedung")->where("id",$produk->lokasi)->first();
+        $titikPenempatan = DB::table("tabel_titik_penempatan")->where("id",$produk->titik_penempatan_id)->first();
+        $item->lokasi = $location->nama_gedung;
+        $item->location_point = $titikPenempatan->nama_titik;
+        return $item;
+    });
+    return response()->json([
+        'message' => 'last inspeksi',
+        'list_inspection' =>$inspection
+    ], 201);
+
+}
 //  public function updateStatusInspection (Request $request)
 //  {
 //     $validator = Validator::make($request->all(), [

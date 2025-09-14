@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\kopSuratController;
 use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\PenawaranController;
 use App\Http\Controllers\ProductController;
@@ -20,6 +21,7 @@ Route::post('change_password', [AuthController::class, 'passVerify']);
 Route::post('set_password', [AuthController::class, 'setPassword']);
 Route::get('inspection/download/{file}', [InspectionController::class, 'downloadAparReport']); 
 Route::get('penawaran/download/{file}', [PenawaranController::class, 'download']);
+Route::get('product/download/{file}', [ProductController::class, 'download']);
 Route::get('product/detail_apar', [ProductController::class, 'detail_apar']); 
 
 
@@ -64,11 +66,13 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::get('apar_done_permount', [ProductController::class, 'apar_done_permount']); 
         Route::post('update_apar', [ProductController::class, 'update']); 
         Route::get('list_qr_apar', [ProductController::class, 'list_qr']); 
+        Route::get('list_qr_apar_super_admin', [ProductController::class, 'listQrSuperAdmin']); 
         Route::get('count_apar_broken', [ProductController::class, 'countAparBroken']); 
         Route::get('count_apar_inspection', [ProductController::class, 'countApatInspection']); 
         Route::get('count_apar_inspection_done', [ProductController::class, 'presentaseInspectionDone']); 
         Route::get('apar_pdf', [ProductController::class, 'list_apar_pdf']); 
         Route::get('list_apar_broken', [ProductController::class, 'listAparBroken']); 
+        Route::get('/download_file', [ProductController::class, 'downloadFile']);
     });
     Route::prefix('inspection')->group(function() {
         Route::post('add_inspection', [InspectionController::class, 'store']); 
@@ -85,12 +89,16 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::post('download_report', [InspectionController::class, 'generateAparReport']); 
         Route::get('part_broken_list', [InspectionController::class, 'precetagePartBroken']);
         Route::get('proggress', [InspectionController::class, 'proggress']); 
+        Route::get('last_inspection_user', [InspectionController::class, 'lastInspection']); 
         Route::post('delete_inspection', [InspectionController::class, 'deleteAparInspection']); 
         // Route::get('count_apar', [ProductController::class, 'count_apar']); 
     });
     Route::prefix('penawaran')->group(function() {
         Route::get('/', [PenawaranController::class, 'index']);
         Route::get('/download_penawaran', [PenawaranController::class, 'ReportPenawaran']);
+    });
+    Route::prefix('kop_surat')->group(function() {
+        Route::post('/insert_kop_surat', [kopSuratController::class, 'insertKopSurat']);
     });
 
 });

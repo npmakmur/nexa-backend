@@ -95,8 +95,9 @@ class CustomerController extends Controller
             ],
             'level' => 'required|exists:tabel_level,id',
             'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg', // max 2MB
+            'password' => 'required|string|min:8',
         ]);
-
+        $user->password = Hash::make($request->password);
         $user->name = $request->name;
         $user->username = $request->username;
         $user->email = $request->email;

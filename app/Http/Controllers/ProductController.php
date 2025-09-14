@@ -200,6 +200,7 @@ class ProductController extends Controller
             "count_qr" => count($products),
             "kode_customer" =>  $request->kode_customer ?? null,
             "path_qr" => $pdfPath,
+            'batch' => $batchNumber,
             "created_at" => now()
         ]);
         return response()->json([
@@ -471,6 +472,38 @@ class ProductController extends Controller
             'data' => $data_qr
         ]);
 
+    }
+    public function listQrSuperAdmin (Request $request)
+    {
+        $data_qr = DB::table("tabel_add_qr")
+        ->where("batch", $request->batch)
+         ->orderBy("id", "desc")
+        ->first();
+        $fileName = base64_encode($data_qr->path_qr);
+        return response()->json([
+            'message' => 'list data qr',
+            'data' => $data_qr,
+            'download_url' =>  url('/api/product/download/' . $fileName)
+        ]);
+
+    }
+    public function download($file)
+    {
+        $file = base64_decode($file);
+        $filename = basename($file);
+        $filePath = storage_path('app/public/' . $file);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'File tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
     public function countAparBroken (Request $request)
     {

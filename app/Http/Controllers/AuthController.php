@@ -179,7 +179,7 @@ class AuthController extends Controller
                 'message' => 'Generate Kode lupa password Berhasil',
             ], 201);
         } else {
-            return response()->json(['message' => 'Gagal Membuat Code'], 500);
+            return response()->json(['message' => 'Akun belum di verifikasi'], 400);
         }
     }
     public function passVerify(Request $request)
