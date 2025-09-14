@@ -82,7 +82,7 @@ class CustomerController extends Controller
         if (!$user) {
             return response()->json(['message' => 'User tidak ditemukan'], 404);
         }
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'username' => [
                 'required',
@@ -94,9 +94,23 @@ class CustomerController extends Controller
                 Rule::unique('users')->ignore($user->id)
             ],
             'level' => 'required|exists:tabel_level,id',
-            'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg', // max 2MB
+            'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'required|string|min:8',
+        ], [
+            'password.required' => 'Password harus diisi',
+            'password.min'      => 'Password minimal 8 karakter',
+            'email.required'    => 'Email harus diisi',
+            'email.email'       => 'Format email tidak valid',
+            'name.required'     => 'Nama harus diisi',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(), // ambil pesan pertama
+                'errors' => $validator->errors()
+            ], 422);
+        }
         $user->password = Hash::make($request->password);
         $user->name = $request->name;
         $user->username = $request->username;
