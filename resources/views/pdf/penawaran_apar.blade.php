@@ -122,7 +122,8 @@
 </head>
 <body>
     <div class="header-section">
-       <img src="{{ asset('surat/header.png') }}" width="100%" alt="">
+        <img src="{{ public_path('surat/header.png') }}" width="100%" alt="">
+
     </div>
     <div class="container">
         <div class="row">
@@ -211,7 +212,7 @@
             <p><strong>Bank</strong>: BCA</p>
         </div>
         <div class="signature">
-            <img src="{{ asset('surat/signature.png') }}" alt="Signature">
+            <img src="{{ public_path('surat/signature.png') }}" alt="Signature">
             <p>Tristan</p>
         </div>
     </div>
