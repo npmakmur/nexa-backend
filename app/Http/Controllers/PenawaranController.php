@@ -191,18 +191,18 @@ class PenawaranController extends Controller
         $filePath = 'reports/' . $fileName;
         Storage::disk('public')->put($filePath, $pdf->output());
         $fileName = base64_encode($fileName);
-         return view('pdf.penawaran_apar', [
-            'data' => $data,
-            'list_penawaran' => $list_penawaran,
-            'total' => $penawaran,
-            'customer' => $data_customer
-        ]);
-        // Return link download
-        // return response()->json([
-        //     'status' => true,
-        //     'message' => 'Laporan penawaran berhasil dibuat',
-        //     'download_url' =>  url('/api/penawaran/download/' . $fileName)
+        //  return view('pdf.penawaran_apar', [
+        //     'data' => $data,
+        //     'list_penawaran' => $list_penawaran,
+        //     'total' => $penawaran,
+        //     'customer' => $data_customer
         // ]);
+        // Return link download
+        return response()->json([
+            'status' => true,
+            'message' => 'Laporan penawaran berhasil dibuat',
+            'download_url' =>  url('/api/penawaran/download/' . $fileName)
+        ]);
     }
     public function download($file)
     {
