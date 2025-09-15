@@ -701,8 +701,8 @@ public function lastInspection()
         $produk = DB::table("tabel_produk")->where("kode_barang", $item->kode_barang)->first();
         $location = DB::table("tabel_gedung")->where("id",$produk->lokasi)->first();
         $titikPenempatan = DB::table("tabel_titik_penempatan")->where("id",$produk->titik_penempatan_id)->first();
-        $item->lokasi = $location->nama_gedung;
-        $item->location_point = $titikPenempatan->nama_titik;
+        $item->lokasi = $location->nama_gedung ?? null;
+        $item->location_point = $titikPenempatan->nama_titik ?? null;
         return $item;
     });
     return response()->json([

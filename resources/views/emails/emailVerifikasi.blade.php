@@ -47,9 +47,6 @@
         <p>{{ $teks }}</p>
         <div class="code">{{ $code }}</div>
         <p>Jika Anda tidak merasa melakukan permintaan ini, abaikan saja email ini.</p>
-        <div class="footer">
-            &copy; 2025 Nama Perusahaan. Semua hak dilindungi.
-        </div>
     </div>
 </body>
 </html>
