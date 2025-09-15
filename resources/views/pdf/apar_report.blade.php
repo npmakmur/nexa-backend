@@ -12,7 +12,6 @@
 <body>
     <div class="header-section">
          @if ($kop && $kop->image)
-            <p>{{ public_path($kop->image) }}</p>
             <img src="{{ public_path("storage/" . $kop->image) }}" width="100%" alt="">
         @endif
     </div>
