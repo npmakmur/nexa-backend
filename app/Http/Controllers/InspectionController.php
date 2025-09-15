@@ -511,9 +511,11 @@ public function generateAparReport(Request $request)
         )
         ->get();
     // Generate PDF
+    $kop = DB::table("kop_surat")->where("type","download_report")->first();
     $pdf = Pdf::loadView('pdf.apar_report', [
         'agenda' => $data,
-        'apar' => $apar
+        'apar' => $apar,
+        'kop' => $kop
     ])->setPaper('A3', 'portrait');
 
     // Simpan langsung ke storage/app/public/reports

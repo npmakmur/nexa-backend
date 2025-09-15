@@ -69,7 +69,7 @@ class kopSuratController extends Controller
             DB::table("kop_surat")
                 ->where("type", $request->type)
                 ->update([
-                    "image" => $url,
+                    "image" => $path,
                     "aktif" => $request->aktif,
                     "updated_at" => now()
                 ]);
