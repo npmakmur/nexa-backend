@@ -200,8 +200,8 @@
                         <td style="padding: 5px 0; text-align: right; border: none; background-color: #ffffff;">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr style="background-color: #007bff;">
-                        <td style="padding: 10px; font-weight: bold; text-align: left; border: none;">Total (IDR)</td>
-                        <td style="padding: 10px; font-weight: bold; text-align: right; border: none;">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
+                        <td style="padding: 5px; font-weight: bold; text-align: left; border: none; color: #ffffff">Total (IDR)</td>
+                        <td style="padding: 5px; font-weight: bold; text-align: right; border: none; color:#ffffff">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>
