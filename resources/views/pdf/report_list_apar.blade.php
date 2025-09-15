@@ -10,6 +10,11 @@
     </style>
 </head>
 <body>
+    <div class="header-section">
+         @if ($kop && $kop->image)
+            <img src="{{ public_path($kop->image) }}" width="100%" alt="">
+        @endif
+    </div>
     <h2>Laporan APAR</h2>
     {{-- <p><strong>No Jadwal:</strong> {{ $agenda->no_jadwal }}</p>
     <p><strong>Inspeksi:</strong> {{ $agenda->inspeksi_title }}</p>

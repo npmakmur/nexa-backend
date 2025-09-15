@@ -11,7 +11,9 @@
 </head>
 <body>
     <div class="header-section">
-        <img src="{{ public_path('surat/header.png') }}" width="100%" alt="">
+         @if ($kop && $kop->image)
+            <img src="{{ public_path($kop->image) }}" width="100%" alt="">
+        @endif
     </div>
     <h2>Laporan Inspeksi APAR</h2>
     <p><strong>No Jadwal:</strong> {{ $agenda->no_jadwal }}</p>

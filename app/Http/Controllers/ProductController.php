@@ -614,6 +614,7 @@ class ProductController extends Controller
     }
     public function list_apar_pdf(Request $request)
     {
+        $kop = DB::table("kop_surat")->where("type","inventory")->where("aktif","aktif")->first();
         $query = Product::where("kode_customer", auth()->user()->kode_customer) ->orderBy("id", "desc");
         $apar = $query->get()->map(function($item){
             $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
@@ -639,7 +640,8 @@ class ProductController extends Controller
         });
 
         $pdf = Pdf::loadView('pdf.report_list_apar', [
-        'apar' => $apar
+        'apar' => $apar,
+        'kop' => $kop
         ])->setPaper('A3', 'portrait');
         $customer_name = DB::table('tabel_master_customer')->where("kode_customer", auth()->user()->kode_customer)->first();
 

@@ -511,7 +511,7 @@ public function generateAparReport(Request $request)
         )
         ->get();
     // Generate PDF
-    $kop = DB::table("kop_surat")->where("type","download_report")->first();
+    $kop = DB::table("kop_surat")->where("type","inspection")->first();
     $pdf = Pdf::loadView('pdf.apar_report', [
         'agenda' => $data,
         'apar' => $apar,
