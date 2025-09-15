@@ -128,21 +128,21 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <table style="border: none; width: 100%;">
+                <table style="border: none; width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="border: none; padding: 4px;">Quotation From</td>
-                        <td style="border: none; padding: 4px;">Quotation For</td>
-                        <td style="border: none; padding: 4px;">Details</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">Quotation From</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">Quotation For</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">Details</td>
                     </tr>
                     <tr>
-                        <td style="border: none; padding: 4px;">PT. Tan Anugrah Sejahtera</td>
-                        <td style="border: none; padding: 4px;">{{ $customer->nama_customer }}</td>
-                        <td style="border: none; padding: 4px;"><span>Quotation No # </span>TAS-XII-Q00797</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">PT. Tan Anugrah Sejahtera</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">{{ $customer->nama_customer }}</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;"><span>Quotation No # </span>TAS-XII-Q00797</td>
                     </tr>
                     <tr>
-                        <td style="border: none; padding: 4px;">Semarang, Indonesia</td>
-                        <td style="border: none; padding: 4px;">Indonesia</td>
-                        <td style="border: none; padding: 4px;"><span>Quotation Date </span>{{ \Carbon\Carbon::now()->format('M d, Y') }}</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">Semarang, Indonesia</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;">Indonesia</td>
+                        <td style="border: none; padding: 4px; background-color: #ffffff;"><span>Quotation Date </span>{{ \Carbon\Carbon::now()->format('M d, Y') }}</td>
                     </tr>
                 </table>
             </div>
@@ -179,9 +179,9 @@
             @endforeach
         </tbody>
     </table>
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #ffffff;">
         <tr>
-            <td style="width: 50%; vertical-align: top; padding: 10px; padding-left: 0; border: none;">
+            <td style="width: 50%; vertical-align: top; padding: 10px; border: none; background-color: #ffffff;">
                 <p style="margin: 0; padding: 0;">Terms and Conditions</p>
                 <p style="margin: 5px 0 0;">Franco : Jakarta</p>
                 <p style="margin: 5px 0 0;">Pembayaran : CBD</p>
@@ -189,7 +189,7 @@
                 <p style="margin: 5px 0 0;">Stok tidak terikat</p>
             </td>
 
-            <td style="width: 50%; vertical-align: top; padding: 10px; border: none;">
+            <td style="width: 50%; vertical-align: top; padding: 10px; border: none; background-color: #ffffff;">
                 <table style="width: 100%; border-collapse: collapse; border: none;">
                     <tr>
                         <td style="padding: 5px 0; text-align: left; border: none;">Amount</td>
@@ -199,7 +199,7 @@
                         <td style="padding: 5px 0; text-align: left; border: none;">PPN</td>
                         <td style="padding: 5px 0; text-align: right; border: none;">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</td>
                     </tr>
-                    <tr style="background-color: #007bff; color: white; border: none;">
+                    <tr style="background-color: #007bff; color: white;">
                         <td style="padding: 10px; font-weight: bold; text-align: left; border: none;">Total (IDR)</td>
                         <td style="padding: 10px; font-weight: bold; text-align: right; border: none;">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
                     </tr>
@@ -207,22 +207,22 @@
             </td>
         </tr>
     </table>
-    <table style="width: 100%; border-collapse: collapse;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
         <tr>
-            <td style="width: 33.33%;"></td>
+            <td style="width: 33.33%; border: none;"></td>
 
-            <td style="width: 33.33%;"></td>
+            <td style="width: 33.33%; border: none;"></td>
 
-            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 10px;">
+            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 10px; border: none;">
                 <div class="signature-section">
                     <div class="signature">
-                        <img src="{{ public_path('surat/signature.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
+                        <img src="{{ public_path('surat/ttd.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
                         <p style="margin: 5px 0 0;">Tristan</p>
                     </div>
                 </div>
             </td>
         </tr>
-    </table>   
+    </table> 
     <div class="bank-details">
         <h3>Bank Details</h3>
         <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
