@@ -96,7 +96,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     Route::prefix('kop_surat')->group(function() {
         Route::post('/insert_kop_surat', [kopSuratController::class, 'insertKopSurat']);
         Route::post('/update_kop_surat', [kopSuratController::class, 'updateKopSurat']);
-        Route::post('/list_kop_surat', [kopSuratController::class, 'listKopSurat']);
+        Route::get('/list_kop_surat', [kopSuratController::class, 'listKopSurat']);
     });
 
 });
