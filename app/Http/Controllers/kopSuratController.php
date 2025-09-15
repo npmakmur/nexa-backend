@@ -102,6 +102,12 @@ class kopSuratController extends Controller
         // Ambil data dari database
         $kopSuratList = $query->get();
 
+        // Ubah path gambar menjadi URL yang bisa diakses publik
+        $kopSuratList = $kopSuratList->map(function ($item) {
+            $item->image_url = Storage::url($item->image);
+            return $item;
+        });
+
         // Mengembalikan data dalam format JSON
         return response()->json([
             'message' => 'Daftar kop surat berhasil diambil',
