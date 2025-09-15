@@ -122,8 +122,7 @@
 </head>
 <body>
     <div class="header-section">
-        <img src="{{ public_path('surat/header.png') }}" width="100%" alt="">
-
+        <img src="{{ public_path($kop->image) }}" width="100%" alt="">
     </div>
     <div class="container">
         <div class="row">
