@@ -179,7 +179,7 @@
             @endforeach
         </tbody>
     </table>
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #ffffff;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #ffffff; border: none;">
         <tr>
             <td style="width: 50%; vertical-align: top; padding: 10px; border: none; background-color: #ffffff;">
                 <p style="margin: 0; padding: 0;">Terms and Conditions</p>
@@ -192,22 +192,22 @@
             <td style="width: 50%; vertical-align: top; padding: 10px; border: none; background-color: #ffffff;">
                 <table style="width: 100%; border-collapse: collapse; border: none;">
                     <tr>
-                        <td style="padding: 5px 0; text-align: left; border: none;">Amount</td>
-                        <td style="padding: 5px 0; text-align: right; border: none;">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</td>
+                        <td style="padding: 5px 0; text-align: left; border: none; background-color: #ffffff;">Amount</td>
+                        <td style="padding: 5px 0; text-align: right; border: none; background-color: #ffffff;">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 5px 0; text-align: left; border: none;">PPN</td>
-                        <td style="padding: 5px 0; text-align: right; border: none;">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</td>
+                        <td style="padding: 5px 0; text-align: left; border: none; background-color: #ffffff;">PPN</td>
+                        <td style="padding: 5px 0; text-align: right; border: none; background-color: #ffffff;">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr style="background-color: #007bff; color: white;">
-                        <td style="padding: 10px; font-weight: bold; text-align: left; border: none;">Total (IDR)</td>
-                        <td style="padding: 10px; font-weight: bold; text-align: right; border: none;">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
+                        <td style="padding: 10px; font-weight: bold; text-align: left; border: none; background-color: #ffffff;">Total (IDR)</td>
+                        <td style="padding: 10px; font-weight: bold; text-align: right; border: none; background-color: #ffffff;">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>
         </tr>
     </table>
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; border: none;">
         <tr>
             <td style="width: 33.33%; border: none;"></td>
 
