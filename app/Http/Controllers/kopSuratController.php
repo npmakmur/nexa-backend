@@ -21,7 +21,7 @@ class kopSuratController extends Controller
 
         // Simpan file baru
         $path = $file->storeAs('kop_surat', $filename, 'public');
-        $url = Storage::url($path);
+        $cleanPath = str_replace('public/', '', $path);
 
         // Ambil data lama jika ada
         $oldKopSurat = DB::table("kop_surat")->where("type", $request->type)->first();
@@ -36,7 +36,7 @@ class kopSuratController extends Controller
         $updateOrInsert = DB::table("kop_surat")->updateOrInsert(
             ["type" => $request->type], // Atribut yang digunakan untuk mencari (kondisi WHERE)
             [
-                "image" => $url,
+                "image" => $cleanPath,
                 "updated_at" => now()
             ]
         );
@@ -59,6 +59,7 @@ class kopSuratController extends Controller
 
         // Simpan di folder 'kop_surat'
         $path = $file->storeAs('kop_surat', $filename, 'public');
+        $cleanPath = str_replace('public/', '', $path);
         $url = Storage::url($path);
 
         // Cek apakah type sudah ada
@@ -69,7 +70,7 @@ class kopSuratController extends Controller
             DB::table("kop_surat")
                 ->where("type", $request->type)
                 ->update([
-                    "image" => $path,
+                    "image" => $cleanPath,
                     "aktif" => $request->aktif,
                     "updated_at" => now()
                 ]);
@@ -78,7 +79,7 @@ class kopSuratController extends Controller
             DB::table("kop_surat")->insert([
                 "type" => $request->type,
                 "aktif" => $request->aktif,
-                "image" => $url,
+                "image" => $cleanPath,
                 "created_at" => now(),
                 "updated_at" => now()
             ]);
