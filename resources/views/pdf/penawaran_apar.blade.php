@@ -207,20 +207,20 @@
             </td>
         </tr>
     </table>
-    <div style="
-        display: flex;
-        justify-content: flex-end; /* Geser ke kanan */
-        width: 100%; 
-        padding-right: 20px; /* Jarak dari tepi kanan */
-        box-sizing: border-box;
-    ">
-        <div style="text-align: center;">
-            <img src="{{ public_path('surat/ttd.png') }}" 
-                style="max-width: 150px; height: auto;" 
-                alt="Signature">
-            <p style="margin: 5px 0 0;">Tristan</p>
-        </div>
-    </div>
+    <table style="width: 100%; border-collapse: collapse; border: none; font-family: Arial, sans-serif;">
+        <tr>
+            <td style="width: 33.33%; border: none;"></td>
+
+            <td style="width: 33.33%; border: none;"></td>
+
+            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 10px; border: none;">
+                <img src="{{ public_path('surat/ttd.png') }}" 
+                    style="width: 100%; max-width: 150px; height: auto;" 
+                    alt="Signature">
+                <p style="margin: 5px 0 0;">Tristan</p>
+            </td>
+        </tr>
+    </table>
 
     <div class="bank-details">
         <h3>Bank Details</h3>
