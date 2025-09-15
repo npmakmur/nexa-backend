@@ -12,7 +12,7 @@
 <body>
     <div class="header-section">
          @if ($kop && $kop->image)
-            <img src="{{ public_path($kop->image) }}" width="100%" alt="">
+            <img src="{{ public_path("kop_surat/kop_surat_inventory_1757931980.png") }}" width="100%" alt="">
         @endif
     </div>
     <h2>Laporan Inspeksi APAR</h2>
