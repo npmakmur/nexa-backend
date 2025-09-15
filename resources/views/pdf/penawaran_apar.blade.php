@@ -207,8 +207,14 @@
             </td>
         </tr>
     </table>
-    <div style="display: flex; justify-content: flex-end; align-items: flex-start; width: 100%;">
-        <div style="text-align: center; padding: 10px;">
+    <div style="
+        display: flex;
+        justify-content: flex-end; /* Memindahkan konten ke sisi kanan */
+        width: 100%;             /* Memastikan kontainer Flexbox mengambil seluruh lebar halaman */
+        padding-right: 20px;     /* Memberi sedikit jarak dari tepi kanan halaman */
+        box-sizing: border-box;  /* Memastikan padding tidak membuat lebar melebihi 100% */
+    ">
+        <div style="text-align: center;">
             <img src="{{ public_path('surat/ttd.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
             <p style="margin: 5px 0 0;">Tristan</p>
         </div>
