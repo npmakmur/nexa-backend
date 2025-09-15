@@ -70,12 +70,14 @@ class kopSuratController extends Controller
                 ->where("type", $request->type)
                 ->update([
                     "image" => $url,
+                    "aktif" => $request->aktif,
                     "updated_at" => now()
                 ]);
         } else {
             // Insert baru
             DB::table("kop_surat")->insert([
                 "type" => $request->type,
+                "aktif" => $request->aktif,
                 "image" => $url,
                 "created_at" => now(),
                 "updated_at" => now()
@@ -84,7 +86,6 @@ class kopSuratController extends Controller
 
         return response()->json([
             'message' => 'Kop surat berhasil disimpan',
-            'url' => $url
         ], 200);
     }
     public function listKopSurat(Request $request)
