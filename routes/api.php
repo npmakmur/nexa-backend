@@ -24,10 +24,6 @@ Route::get('penawaran/download/{file}', [PenawaranController::class, 'download']
 Route::get('product/download/{file}', [ProductController::class, 'download']);
 Route::get('product/detail_apar', [ProductController::class, 'detail_apar']); 
 
-
-
-
-
 Route::middleware([CheckTokenValid::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('customer')->group(function () {
@@ -99,6 +95,8 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     });
     Route::prefix('kop_surat')->group(function() {
         Route::post('/insert_kop_surat', [kopSuratController::class, 'insertKopSurat']);
+        Route::post('/update_kop_surat', [kopSuratController::class, 'updateKopSurat']);
+        Route::post('/list_kop_surat', [kopSuratController::class, 'listKopSurat']);
     });
 
 });
