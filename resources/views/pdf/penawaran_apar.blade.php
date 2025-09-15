@@ -207,22 +207,12 @@
             </td>
         </tr>
     </table>
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; border: none;">
-        <tr>
-            <td style="border: none;"></td>
-
-            <td style="border: none;"></td>
-
-            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 10px; border: none;">
-                <div class="signature-section">
-                    <div class="signature">
-                        <img src="{{ public_path('surat/ttd.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
-                        <p style="margin: 5px 0 0;">Tristan</p>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table> 
+    <div style="display: flex; justify-content: flex-end; align-items: flex-start; width: 100%;">
+        <div style="text-align: center; padding: 10px;">
+            <img src="{{ public_path('surat/ttd.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
+            <p style="margin: 5px 0 0;">Tristan</p>
+        </div>
+    </div>
     <div class="bank-details">
         <h3>Bank Details</h3>
         <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
