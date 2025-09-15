@@ -179,42 +179,55 @@
             @endforeach
         </tbody>
     </table>
-
-    <div class="summary-container">
-        <div class="terms-conditions">
-            <h3>Terms and Conditions</h3>
-            <p>Franco : Jakarta</p>
-            <p>Pembayaran : CBD</p>
-            <p>Validasi Penawaran : 7 Hari Kerja</p>
-            <p>Stok tidak terikat</p>
-        </div>
-        <div class="amount-summary">
-            <div class="amount-row">
-                <span class="amount-label">Amount</span>
-                <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
-            </div>
-            <div class="amount-row">
-                <span class="amount-label">PPN</span>
-                <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
-            </div>
-            <div class="total-row">
-                <span class="total-label">Total (IDR)</span>
-                <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
+     <div class="row">
+        <div class="col-6">
+            <div class="summary-container">
+                <div class="terms-conditions">
+                    <h3>Terms and Conditions</h3>
+                    <p>Franco : Jakarta</p>
+                    <p>Pembayaran : CBD</p>
+                    <p>Validasi Penawaran : 7 Hari Kerja</p>
+                    <p>Stok tidak terikat</p>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="signature-section">
-        <div class="bank-details">
-            <h3>Bank Details</h3>
-            <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
-            <p><strong>Account Number</strong>: 2460623530</p>
-            <p><strong>Bank</strong>: BCA</p>
+        <div class="col-6">
+            <div class="summary-container">
+                <div class="amount-summary">
+                <div class="amount-row">
+                    <span class="amount-label">Amount</span>
+                    <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
+                </div>
+                <div class="amount-row">
+                    <span class="amount-label">PPN</span>
+                    <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">Total (IDR)</span>
+                    <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
+                </div>
+            </div>
         </div>
-        <div class="signature">
-            <img src="{{ public_path('surat/signature.png') }}" alt="Signature">
-            <p>Tristan</p>
+     </div>
+     <div class="row">
+        <div class="col-4">
         </div>
+        <div class="col-4">
+        </div>
+        <div class="col-4">
+            <div class="signature-section">
+                <div class="signature">
+                    <img src="{{ public_path('surat/signature.png') }}" width="100%" alt="Signature">
+                    <p>Tristan</p>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <div class="bank-details">
+        <h3>Bank Details</h3>
+        <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
+        <p><strong>Account Number</strong>: 2460623530</p>
+        <p><strong>Bank</strong>: BCA</p>
     </div>
 </body>
 </html>
