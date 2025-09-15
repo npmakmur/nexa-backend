@@ -179,50 +179,55 @@
             @endforeach
         </tbody>
     </table>
-     <div class="row">
-        <div class="col-6">
-            <div class="summary-container">
-                <div class="terms-conditions">
-                    <h3>Terms and Conditions</h3>
-                    <p>Franco : Jakarta</p>
-                    <p>Pembayaran : CBD</p>
-                    <p>Validasi Penawaran : 7 Hari Kerja</p>
-                    <p>Stok tidak terikat</p>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="width: 50%; vertical-align: top; padding: 10px;">
+                <div class="summary-container">
+                    <div class="terms-conditions">
+                        <h3>Terms and Conditions</h3>
+                        <p>Franco : Jakarta</p>
+                        <p>Pembayaran : CBD</p>
+                        <p>Validasi Penawaran : 7 Hari Kerja</p>
+                        <p>Stok tidak terikat</p>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="summary-container">
-                <div class="amount-summary">
-                <div class="amount-row">
-                    <span class="amount-label">Amount</span>
-                    <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
+            </td>
+            <td style="width: 50%; vertical-align: top; padding: 10px;">
+                <div class="summary-container">
+                    <div class="amount-summary">
+                        <div class="amount-row">
+                            <span class="amount-label">Amount</span>
+                            <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="amount-row">
+                            <span class="amount-label">PPN</span>
+                            <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total (IDR)</span>
+                            <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="amount-row">
-                    <span class="amount-label">PPN</span>
-                    <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
+            </td>
+        </tr>
+    </table>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="width: 33.33%;"></td>
+
+            <td style="width: 33.33%;"></td>
+
+            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 10px;">
+                <div class="signature-section">
+                    <div class="signature">
+                        <img src="{{ public_path('surat/signature.png') }}" style="width: 100%; max-width: 150px; height: auto;" alt="Signature">
+                        <p style="margin: 5px 0 0;">Tristan</p>
+                    </div>
                 </div>
-                <div class="total-row">
-                    <span class="total-label">Total (IDR)</span>
-                    <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
-                </div>
-            </div>
-        </div>
-     </div>
-     <div class="row">
-        <div class="col-4">
-        </div>
-        <div class="col-4">
-        </div>
-        <div class="col-4">
-            <div class="signature-section">
-                <div class="signature">
-                    <img src="{{ public_path('surat/signature.png') }}" width="100%" alt="Signature">
-                    <p>Tristan</p>
-                </div>
-            </div>
-        </div>
-    </div>    
+            </td>
+        </tr>
+    </table>   
     <div class="bank-details">
         <h3>Bank Details</h3>
         <p><strong>Account Name</strong>: RAHSIWI BITRISTAN PAMUNGKAS</p>
