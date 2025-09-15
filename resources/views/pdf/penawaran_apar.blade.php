@@ -179,36 +179,31 @@
             @endforeach
         </tbody>
     </table>
-    <table style="width: 100%; border-collapse: collapse;">
+    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
         <tr>
-            <td style="width: 50%; vertical-align: top; padding: 10px;">
-                <div class="summary-container">
-                    <div class="terms-conditions">
-                        <h3>Terms and Conditions</h3>
-                        <p>Franco : Jakarta</p>
-                        <p>Pembayaran : CBD</p>
-                        <p>Validasi Penawaran : 7 Hari Kerja</p>
-                        <p>Stok tidak terikat</p>
-                    </div>
-                </div>
+            <td style="width: 50%; vertical-align: top; padding: 10px; padding-left: 0; border: none;">
+                <p style="margin: 0; padding: 0;">Terms and Conditions</p>
+                <p style="margin: 5px 0 0;">Franco : Jakarta</p>
+                <p style="margin: 5px 0 0;">Pembayaran : CBD</p>
+                <p style="margin: 5px 0 0;">Validasi Penawaran : 7 Hari Kerja</p>
+                <p style="margin: 5px 0 0;">Stok tidak terikat</p>
             </td>
-            <td style="width: 50%; vertical-align: top; padding: 10px;">
-                <div class="summary-container">
-                    <div class="amount-summary">
-                        <div class="amount-row">
-                            <span class="amount-label">Amount</span>
-                            <span class="amount-value">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</span>
-                        </div>
-                        <div class="amount-row">
-                            <span class="amount-label">PPN</span>
-                            <span class="amount-value">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</span>
-                        </div>
-                        <div class="total-row">
-                            <span class="total-label">Total (IDR)</span>
-                            <span class="total-value">IDR {{ number_format($grand_total, 0, ',', '.') }}</span>
-                        </div>
-                    </div>
-                </div>
+
+            <td style="width: 50%; vertical-align: top; padding: 10px; border: none;">
+                <table style="width: 100%; border-collapse: collapse; border: none;">
+                    <tr>
+                        <td style="padding: 5px 0; text-align: left; border: none;">Amount</td>
+                        <td style="padding: 5px 0; text-align: right; border: none;">IDR {{ number_format($subtotal_all_items, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; text-align: left; border: none;">PPN</td>
+                        <td style="padding: 5px 0; text-align: right; border: none;">IDR {{ number_format($ppn_amount, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr style="background-color: #007bff; color: white; border: none;">
+                        <td style="padding: 10px; font-weight: bold; text-align: left; border: none;">Total (IDR)</td>
+                        <td style="padding: 10px; font-weight: bold; text-align: right; border: none;">IDR {{ number_format($grand_total, 0, ',', '.') }}</td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
