@@ -112,7 +112,7 @@ class kopSuratController extends Controller
 
         // Ubah path gambar menjadi URL yang bisa diakses publik
         $kopSuratList = $kopSuratList->map(function ($item) {
-            $item->image_url = Storage::url($item->image);
+            $item->image_url = asset(Storage::url($item->image));
             return $item;
         });
 

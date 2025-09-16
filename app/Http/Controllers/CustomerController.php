@@ -95,9 +95,8 @@ class CustomerController extends Controller
             ],
             'level' => 'required|exists:tabel_level,id',
             'foto_profile' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password' => 'required|string|min:8',
+            'password' => 'string|min:8',
         ], [
-            'password.required' => 'Password harus diisi',
             'password.min'      => 'Password minimal 8 karakter',
             'email.required'    => 'Email harus diisi',
             'email.email'       => 'Format email tidak valid',
@@ -111,7 +110,9 @@ class CustomerController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $user->password = Hash::make($request->password);
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
         $user->name = $request->name;
         $user->username = $request->username;
         $user->email = $request->email;
@@ -307,6 +308,24 @@ class CustomerController extends Controller
          return response()->json([
             'message' => 'Data list kode customer',
             'data' => $tabel_master_customer,
+        ], 200);
+    }
+    public function listAllCustomer (Request $request)
+    {
+        $query = User::where("users.akun_aktif", 1)
+        ->leftJoin('tabel_level', 'users.id_level', '=', 'tabel_level.id')
+        ->select(
+            "users.*",
+            "tabel_level.nama_level"
+        )
+        ->orderByRaw("LEFT(name, 1) ASC");
+        if ($request->filled('id_level')) {
+            $query->where('id_level', $request->id_level);
+        }
+        $user = $query->get();
+        return response()->json([
+            'message' => 'List User',
+            'data' => $user,
         ], 200);
     }
 }

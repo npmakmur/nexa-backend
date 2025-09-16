@@ -32,6 +32,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
         Route::post('update', [CustomerController::class, 'update']);
         Route::post('update_foto_profile', [CustomerController::class, 'updateFotoProfile']);
         Route::get('list_user', [CustomerController::class, 'listUser']);
+        Route::get('list_user_all', [CustomerController::class, 'listAllCustomer']);
         Route::get('detail_user', [CustomerController::class, 'detailUser']);
         Route::delete('delete_user', [CustomerController::class, 'destroy']); 
         Route::get('count_user', [CustomerController::class, 'countUser']); 
