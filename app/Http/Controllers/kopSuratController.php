@@ -73,6 +73,7 @@ class kopSuratController extends Controller
             // Update
             DB::table("kop_surat")
                 ->where("type", $request->type)
+                ->where("kode_customer", auth()->user()->kode_customer)
                 ->update([
                     "image" => $cleanPath,
                     "aktif" => $request->aktif,
