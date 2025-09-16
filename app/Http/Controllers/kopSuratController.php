@@ -12,7 +12,7 @@ class kopSuratController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
-            "type" => "required"
+            "type" => "required",
         ]);
 
         $file = $request->file('image');
@@ -36,6 +36,7 @@ class kopSuratController extends Controller
         $updateOrInsert = DB::table("kop_surat")->updateOrInsert(
             ["type" => $request->type], // Atribut yang digunakan untuk mencari (kondisi WHERE)
             [
+                "kode_customer" => auth()->user()->kode_customer,
                 "image" => $cleanPath,
                 "updated_at" => now()
             ]
@@ -81,6 +82,8 @@ class kopSuratController extends Controller
                 "aktif" => $request->aktif,
                 "image" => $cleanPath,
                 "created_at" => now(),
+                "kode_customer" => auth()->user()->kode_customer,
+
                 "updated_at" => now()
             ]);
         }

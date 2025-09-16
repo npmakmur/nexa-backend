@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Symfony\Component\Uid\NilUlid;
 
-use function PHPSTORM_META\map;
-
 class ProductController extends Controller
 {
     public function store(Request $request)
@@ -211,19 +209,27 @@ class ProductController extends Controller
     }
     public function getAparSuperAdmin(Request $request)
     {
-        $apar = Product::where("kode_customer", null) 
-            ->orderBy("id", "desc")
-            ->get() // Panggil get() untuk mengeksekusi query dan mendapatkan koleksi
-            ->map(function($item){
-                $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
-                $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id",$item->titik_penempatan_id)->first();
-                
-                $item->lokasi = $lokasi->nama_gedung ?? null;
-                $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
-                
-            return $item;
-        })
-        ->groupBy('batch');
+        $apar = DB::table("tabel_add_qr")
+                ->whereNotNull("batch")
+                ->orderBy("id", "desc")
+                ->get()
+                ->map(function($data){
+                     $list_apar = Product::where("batch", $data->batch)
+                    ->get()
+                    ->map(function($item){
+                        $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
+                        $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id", $item->titik_penempatan_id)->first();
+                        
+                        $item->lokasi = $lokasi->nama_gedung ?? null;
+                        $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
+                        return $item;
+                    });
+                    $fileName = base64_encode($data->path_qr);
+                    $data->download_qr_url =  url('/api/product/download/' . $fileName);
+                    $data->count_apar = count($list_apar);
+                    $data->list_apar = $list_apar;
+                    return $data;
+                });
 
         return response()->json([
             'message' => 'List APAR Super Admin.',
