@@ -319,8 +319,8 @@ class CustomerController extends Controller
             "tabel_level.nama_level"
         )
         ->orderByRaw("LEFT(name, 1) ASC");
-        if ($request->filled('id_level')) {
-            $query->where('id_level', $request->id_level);
+        if ($request->filled('email')) {
+            $query->where('email', $request->email);
         }
         $user = $query->get();
         return response()->json([
