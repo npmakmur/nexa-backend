@@ -34,7 +34,10 @@ class kopSuratController extends Controller
 
         // Update atau insert data baru
         $updateOrInsert = DB::table("kop_surat")->updateOrInsert(
-            [ "kode_customer" => auth()->user()->kode_customer,], // Atribut yang digunakan untuk mencari (kondisi WHERE)
+            [
+                "type" => $request->type,
+                "kode_customer" => auth()->user()->kode_customer
+            ], // Atribut yang digunakan untuk mencari (kondisi WHERE)
             [
                 "kode_customer" => auth()->user()->kode_customer,
                 "image" => $cleanPath,
