@@ -458,7 +458,10 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Jumlah APAR yang sudah diinspeksi pada bulan ' . $now->translatedFormat('F') . '.',
-            'data' => round($persentase, 2) . '%', 200
+             'data' => (object)[
+                    'persentase' => round($persentase, 2) . '%', 200,
+                    'count_apar' => $count_apar
+                ]
         ]);
     }
     public function list_qr (Request $request)
