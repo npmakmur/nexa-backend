@@ -99,7 +99,7 @@ class kopSuratController extends Controller
     public function listKopSurat(Request $request)
     {
         // Mulai query ke tabel 'kop_surat'
-        $query = DB::table('kop_surat');
+        $query = DB::table('kop_surat')->where("kode_customer", auth()->user()->kode_customer);
 
         // Cek apakah request memiliki parameter 'type'
         if ($request->has('type') && $request->type != '') {
