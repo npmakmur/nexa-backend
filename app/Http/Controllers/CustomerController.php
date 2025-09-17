@@ -328,4 +328,39 @@ class CustomerController extends Controller
             'data' => $user,
         ], 200);
     }
+    public function updatePassCustomer (Request $request)
+    {
+        $user = User::find($request->id);
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:8',
+        ], [
+            'password.min'      => 'Password minimal 8 karakter',
+            'password.required'    => 'Password harus diisi',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(), // ambil pesan pertama
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        $user->password = Hash::make($request->password);
+        $user->updated_by = auth()->user()->id;
+        $user->save();
+        $aktivitas = Aktivitas::create([
+            'aktivitas_by' => auth()->user()->id,
+            'aktivitas_name' => 'Memperbarui data pengguna dengan id : '. $request->id,
+            'tanggal' => now(),
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Password User berhasil diperbarui',
+        ], 200);
+    }
 }
