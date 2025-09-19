@@ -84,7 +84,7 @@ class ProductController extends Controller
         }
 
         // Buat PDF berisi semua QR code
-        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes]);
+        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes])->setPaper('a3', 'portrait');;
         $pdfFileName = 'all_qr_codes_' . now()->format('Ymd_His') . '.pdf';
         $pdfPath = 'qrcodes_pdf/' . $pdfFileName;
         Storage::disk('public')->put($pdfPath, $pdf->output());
@@ -179,7 +179,7 @@ class ProductController extends Controller
         }
 
         // Buat PDF berisi semua QR code
-        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes]);
+        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes])->setPaper('a3', 'portrait');;
         $pdfFileName = 'all_qr_codes_' . now()->format('Ymd_His') . '.pdf';
         $pdfPath = 'qrcodes_pdf/' . $pdfFileName;
         Storage::disk('public')->put($pdfPath, $pdf->output());
@@ -246,13 +246,22 @@ class ProductController extends Controller
         $batchToUpdate = $request->input('batch');
         $newCustomerCode = $request->input('kode_customer');
 
+
         // Ambil data APAR berdasarkan batch
         $apar = Product::where('batch', $batchToUpdate)
-                        ->get()
-                        ->groupBy('batch');
+                        ->get();
+        if (!$apar) {
+            return response()->json([
+                'message' => 'Apar tidak ditemukan',
+            ], 400);
+        }
 
         $affectedRows = Product::where('batch', $batchToUpdate)
                                ->update(['kode_customer' => $newCustomerCode]);
+        $qr = DB::table("tabel_add_qr")->where("batch", $batchToUpdate)->update([
+            'kode_customer' => $newCustomerCode
+        ]);
+        
 
 
         return response()->json([
@@ -651,7 +660,7 @@ class ProductController extends Controller
         $pdf = Pdf::loadView('pdf.report_list_apar', [
         'apar' => $apar,
         'kop' => $kop
-        ])->setPaper('A3', 'portrait');
+        ])->setPaper('a3', 'portrait');
         $customer_name = DB::table('tabel_master_customer')->where("kode_customer", auth()->user()->kode_customer)->first();
 
         // Simpan langsung ke storage/app/public/reports

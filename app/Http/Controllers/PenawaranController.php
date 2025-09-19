@@ -184,7 +184,7 @@ class PenawaranController extends Controller
             'list_penawaran' => $list_penawaran,
             'total' => $penawaran,
             'customer' => $data_customer
-        ])->setPaper('A4', 'portrait');
+        ])->setPaper('a3', 'portrait');
 
         // Simpan file ke storage/app/public/reports
         $fileName = 'Penawaran_APAR_' . str_replace('/', '-', $data->no_jadwal) . '.pdf';

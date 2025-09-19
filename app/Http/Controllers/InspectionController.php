@@ -516,7 +516,7 @@ public function generateAparReport(Request $request)
         'agenda' => $data,
         'apar' => $apar,
         'kop' => $kop
-    ])->setPaper('A3', 'portrait');
+    ])->setPaper('a3', 'portrait');
 
     // Simpan langsung ke storage/app/public/reports
     $fileName = 'Laporan_Inspeksi_APAR_A1' . str_replace('/', '-', $data->no_jadwal) . '.pdf';
