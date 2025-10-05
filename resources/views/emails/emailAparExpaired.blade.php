@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peringatan Kedaluwarsa APAR</title>
+    <title>Fire Extinguisher Expiration Warning</title>
     <style>
-        /* Gaya Inline Kritis untuk Kompatibilitas Email */
+        /* Critical Inline Styles for Email Compatibility */
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; }
         .header { background-color: #e8173eff; color: white; padding: 20px; text-align: center; }
@@ -22,26 +22,26 @@
     <div class="container">
         
         <div class="header">
-            <h2>Peringatan Kedaluwarsa APAR</h2>
+            <h2>Fire Extinguisher Expiration Warning</h2>
         </div>
         
         <div class="content">
             
-            <p>Yth. {{ $customer->nama_customer }}</p>
+            <p>Dear {{ $customer->nama_customer }},</p>
             
-            <p>Kami mengirimkan email ini untuk mengingatkan Anda bahwa {{ $apars->count() }} unit Alat Pemadam Api Ringan (APAR) di bawah pengawasan Anda akan segera **kedaluwarsa dalam waktu kurang dari 30 hari**.</p>
+            <p>We are sending this email to remind you that **{{ $apars->count() }} unit(s)** of Portable Fire Extinguishers (APAR/FIRE EXTINGUISHERS) under your supervision will **expire in less than 30 days**.</p>
 
-            <p class="warning">Penting: APAR yang kedaluwarsa tidak menjamin fungsi optimal dalam situasi darurat.</p>
+            <p class="warning">Important: Expired fire extinguishers are not guaranteed to function optimally in an emergency.</p>
 
-            <h3>Detail Unit yang Perlu Diperhatikan:</h3>
+            <h3>Details of Units Requiring Attention:</h3>
             
             <table>
                 <thead>
                     <tr>
-                        <th>Kode Barang</th>
-                        <th>Media</th>
-                        <th>Kapasitas</th>
-                        <th>Tanggal Kedaluwarsa</th>
+                        <th>Item Code</th>
+                        <th>Medium</th>
+                        <th>Capacity</th>
+                        <th>Expiration Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,19 +50,19 @@
                         <td>{{ $apar->kode_barang }}</td>
                         <td>{{ $apar->media }}</td>
                         <td>{{ $apar->kapasitas }} Kg</td>
-                        <td class="warning">{{ \Carbon\Carbon::parse($apar->tgl_kadaluarsa)->format('d F Y') }}</td>
+                        <td class="warning">{{ \Carbon\Carbon::parse($apar->tgl_kadaluarsa)->format('F d, Y') }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
 
-            <p>Mohon segera tindak lanjuti untuk melakukan pengisian ulang (refill) atau penggantian APAR tersebut untuk menjaga standar keselamatan dan mematuhi peraturan yang berlaku.</p>
-            <p>Terima kasih atas perhatian Anda terhadap keselamatan.</p>
-            <p>Salam hormat,<br>Tim Keamanan Inventaris Anda</p>
+            <p>Please take immediate action to perform a **refill (recharge)** or **replacement** of these extinguishers to maintain safety standards and comply with applicable regulations.</p>
+            <p>Thank you for your attention to safety.</p>
+            <p>Sincerely,<br>Your Inventory Security Team</p>
         </div>
 
         <div class="footer">
-            <p>Email ini dikirim otomatis oleh sistem. Mohon jangan balas email ini.</p>
+            <p>This email was sent automatically by the system. Please do not reply to this email.</p>
         </div>
     </div>
 </body>
