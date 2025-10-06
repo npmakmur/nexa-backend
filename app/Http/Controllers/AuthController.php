@@ -164,7 +164,6 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users,email',
         ]);
         $user = User::where('email', $request->email)
-        ->where('akun_aktif', 1)
         ->first();
         $nama = $user->name;
         $code_verifikasi = random_int(100000, 999999);
