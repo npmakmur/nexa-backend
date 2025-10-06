@@ -191,7 +191,6 @@ class AuthController extends Controller
         ]);
         $token = Str::random(60);
         $cek = User::where('email', $request->email)
-        ->where('akun_aktif',1)
         ->where('code_verifikasi', $request->verifed_code)
         ->first();
         if (!$cek) {

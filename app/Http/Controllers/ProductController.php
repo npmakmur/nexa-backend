@@ -369,6 +369,7 @@ class ProductController extends Controller
         $product->update($data);
 
         // Catat aktivitas
+
         $now = now();
         Aktivitas::create([
             'aktivitas_by' => auth()->id(),
