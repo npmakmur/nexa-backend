@@ -558,8 +558,8 @@ public function precetagePartBroken (Request $request)
     ->where('kode_customer', auth()->user()->kode_customer)
     ->get()
     ->map(function ($data) use ($partBrokenCount) {
-        $raw_percentage = $partBrokenCount > 0 
-            ? ($data->total_rusak / $partBrokenCount) * 100 
+        $raw_percentage = $partBrokenCount > 0
+            ? ($data->total_rusak / $partBrokenCount) * 100
             : 0;
 
         // Simpan nilai bulat & desimal
@@ -575,7 +575,7 @@ public function precetagePartBroken (Request $request)
         $difference = 100 - $total;
         $partBroken = $partBroken->sortByDesc('fraction')->values();
         for ($i = 0; $i < $difference; $i++) {
-            $partBroken[$i]->persentase_rusak++;
+            if (isset($partBroken[$i])) $partBroken[$i]->persentase_rusak++;
         }
     }
 // Kalau lebih dari 100, kurangi dari yang fraction terkecil
@@ -583,7 +583,7 @@ public function precetagePartBroken (Request $request)
         $difference = $total - 100;
         $partBroken = $partBroken->sortBy('fraction')->values();
         for ($i = 0; $i < $difference; $i++) {
-            $partBroken[$i]->persentase_rusak--;
+            if (isset($partBroken[$i])) $partBroken[$i]->persentase_rusak--;
         }
     }
 

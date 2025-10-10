@@ -51,7 +51,7 @@ class CheckAparExpiration extends Command
         foreach ($customersToNotify as $customer) {
              if ($customer->apar->isNotEmpty()) {
                     Mail::to($customer->email)->send(new AparExpirationWarning($customer, $customer->apar));
-                      $this->info("Notifikasi dikirim ke Customer: {$customer->kode_customer}");
+                      $this->info("Notifikasi dikirim ke Customer: {$customer->email}");
             }
         }
 

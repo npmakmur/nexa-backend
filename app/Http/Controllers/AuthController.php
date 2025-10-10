@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    
+
     public function register(Request $request)
     {
         $request->validate([
@@ -42,7 +42,7 @@ class AuthController extends Controller
         $user->gender = $request->gender;
         $user->id_level = 1;
         $user->save();
-  
+
         $customer = DB::table('tabel_master_customer')->insert([
             'kode_customer' => $kode_customer,
             'nama_customer' => $request->nama_organisasi,
@@ -95,25 +95,25 @@ class AuthController extends Controller
         if (!$cek) {
             return response()->json(['message' => 'Kode verifikasi salah.'], 404);
         }
-        
+
         // Cek apakah sudah lebih dari 1 menit
         $kodeDibuat = Carbon::parse($cek->email_verified_at);
         $sekarang = Carbon::now();
         if ($kodeDibuat->diffInMinutes($sekarang) > 1) {
             return response()->json(['message' => 'Kode verifikasi sudah kadaluarsa.'], 410);
         }
-        $cek->email_verified_at = now(); 
-        $cek->code_verifikasi = null; 
-        $cek->akun_aktif = 1; 
+        $cek->email_verified_at = now();
+        $cek->code_verifikasi = null;
+        $cek->akun_aktif = 1;
         $cek->save();
         return response()->json([
             'status' => 'success',
             'message' => 'Email berhasil diverifikasi.',
             'user' => $cek,
         ], 200);
-        
 
-        
+
+
 
 
     }
@@ -151,7 +151,7 @@ class AuthController extends Controller
         $user = auth()->user();
         $user->remember_token = $token;
         $user->save();
-    
+
         return response()->json([
             'message' => 'Login berhasil',
             'token' => $token,
@@ -201,14 +201,15 @@ class AuthController extends Controller
         if ($kodeDibuat->diffInMinutes($sekarang) > 5) {
             return response()->json(['message' => 'Kode sudah kadaluarsa.'], 410);
         }
-        $cek->reset_token = hash('sha256', $token); 
-        $cek->reset_token_expired = now()->addMinutes(1); 
-        $cek->code_verifikasi = null;  
-        $cek->updated_at = now(); 
+        $cek->reset_token = hash('sha256', $token);
+        $cek->reset_token_expired = now()->addMinutes(1);
+        $cek->code_verifikasi = null;
+        $cek->akun_aktif = 1;
+        $cek->updated_at = now();
         $cek->save();
         return response()->json([
             'status' => 'success',
-            'message' => 'Password berhasil diubah.',
+            'message' => 'Verifikasi berhasil',
             'user' => $cek,
         ], 200);
     }
@@ -218,7 +219,7 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users,email',
             'reset_token' => 'required',
             'new_pass' => 'required|min:6', // bisa pakai confirmed kalau ada konfirmasi password
-        ]); 
+        ]);
 
         $user = User::where('email', $request->email)
             ->where('reset_token', $request->reset_token)
@@ -248,7 +249,7 @@ class AuthController extends Controller
         try {
             // Invalidate token yang sedang aktif
             JWTAuth::invalidate(JWTAuth::parseToken());
-    
+
             return response()->json([
                 'message' => 'Logout berhasil, token telah dihapus'
             ],200);
