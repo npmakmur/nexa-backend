@@ -56,6 +56,7 @@ Route::middleware([CheckTokenValid::class])->group(function () {
     });
     Route::prefix('product')->group(function() {
         Route::post('add_product', [ProductController::class, 'store']); 
+        Route::delete('delete_apar', [ProductController::class, 'deleteApar']); 
         Route::post('add_product_super_admin', [ProductController::class, 'storeSuperAdmin']); 
         Route::post('update_produk_super_admin', [ProductController::class, 'updateCustomerCodeByBatch']); 
         Route::get('list_apar_super_admin', [ProductController::class, 'getAparSuperAdmin']); 

@@ -10,11 +10,11 @@
     </style>
 </head>
 <body>
-    <div class="header-section">
-         {{-- @if ($kop && $kop->image)
+    {{-- <div class="header-section">
+         @if ($kop && $kop->image)
             <img src="{{ public_path("storage/" . $kop->image) }}" width="100%" alt="">
-        @endif --}}
-    </div>
+        @endif
+    </div> --}}
     <h2>Laporan Inspeksi APAR</h2>
     <p><strong>No Jadwal:</strong> {{ $agenda->no_jadwal }}</p>
     <p><strong>Inspeksi:</strong> {{ $agenda->inspeksi_title }}</p>

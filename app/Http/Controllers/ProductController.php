@@ -18,6 +18,56 @@ use Symfony\Component\Uid\NilUlid;
 
 class ProductController extends Controller
 {
+    public function deleteApar (Request $request)
+    {
+        $request->validate([
+            'id' => 'required|array|min:1',
+            'id.*' => 'required|integer|exists:tabel_produk,id',
+        ]);
+        $productIds = $request->input('id');
+        $products = Product::whereIn('id', $productIds)
+                    ->where('kode_customer', auth()->user()->kode_customer)
+                    ->get();
+
+        if ($products->count() !== count($productIds)) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Gagal menghapus: Beberapa produk tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.',
+            ], 403);
+        }
+        $deletedCodes = [];
+        foreach ($products as $product) {
+            $qrPath = 'qrcodes/' . $product->kode_barang . '.png';
+            if (Storage::disk('public')->exists($qrPath)) {
+                Storage::disk('public')->delete($qrPath);
+            }
+            $deletedCodes[] = $product->kode_barang;
+            if($product->batch)
+            {
+                $batch = DB::table("tabel_add_qr")->where("batch", $product->batch)->first();
+                $count = $batch->count_qr;
+                $jumlah = $count - 1; 
+                $update = DB::table("tabel_add_qr")->where("batch", $product->batch)->update([
+                    "count_qr" => $jumlah
+                ]);
+            }
+            $product->delete();
+        }
+        Aktivitas::create([
+            'aktivitas_by' => auth()->user()->id,
+            'aktivitas_name' => 'Menghapus massal ' . count($deletedCodes) . ' unit apar (Kode: ' . implode(', ', $deletedCodes) . ')',
+            'tanggal' => now(),
+            'created_by' => auth()->user()->id,
+            'created_at' => now(),
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'message' => count($deletedCodes) . ' Produk (APAR) berhasil dihapus secara massal.',
+            'deleted_codes' => $deletedCodes,
+        ], 200);
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -396,6 +446,7 @@ class ProductController extends Controller
             'expired_kondisi.detail_kondisi as detail_expired',
             'lokasi_name.nama_gedung as building_name',
             'placement_point.nama_titik as placement_point_name',
+            'owner_apar.nama_customer as owner_apar',
         )
         ->leftJoin('tabel_detail_kondisi as pressure_kondisi', 'tabel_produk.pressure', '=', 'pressure_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_produk.hose', '=', 'hose_kondisi.id')
@@ -404,6 +455,7 @@ class ProductController extends Controller
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_produk.expired', '=', 'expired_kondisi.id')
         ->leftJoin('tabel_gedung as lokasi_name', 'tabel_produk.lokasi', '=', 'lokasi_name.id')
         ->leftJoin('tabel_titik_penempatan as placement_point', 'tabel_produk.titik_penempatan_id', '=', 'placement_point.id')
+        ->leftJoin('tabel_master_customer as owner_apar', 'tabel_produk.kode_customer', '=', 'owner_apar.kode_customer')
         ->where('kode_barang', $request->id_barang)
         ->first();
 
