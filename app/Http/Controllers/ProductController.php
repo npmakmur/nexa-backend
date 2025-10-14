@@ -527,23 +527,9 @@ class ProductController extends Controller
     public function countAparBroken (Request $request)
     {
         $apar = DB::table("tabel_produk")
+            ->where("status","rusak")
             ->where("kode_customer", auth()->user()->kode_customer)
-            ->get()
-            ->map(function($data){
-                $brokenApar = DB::table("tabel_inspection")
-                    ->where("kode_barang", $data->kode_barang)
-                    ->orderByDesc("id_inspection")
-                    ->first();
-
-                $data->last_inspection = $brokenApar; // simpan object inspection
-                return $data;
-            })
-            ->filter(function($data) {
-                return $data->last_inspection 
-                    && $data->last_inspection->status === 'rusak';
-            })
             ->count();
-
         return response()->json([
             'message' => 'jumlah apar rusak',
             'data' => [

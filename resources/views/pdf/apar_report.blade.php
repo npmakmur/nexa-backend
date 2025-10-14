@@ -11,9 +11,9 @@
 </head>
 <body>
     <div class="header-section">
-         @if ($kop && $kop->image)
+         {{-- @if ($kop && $kop->image)
             <img src="{{ public_path("storage/" . $kop->image) }}" width="100%" alt="">
-        @endif
+        @endif --}}
     </div>
     <h2>Laporan Inspeksi APAR</h2>
     <p><strong>No Jadwal:</strong> {{ $agenda->no_jadwal }}</p>
@@ -55,10 +55,34 @@
                     <td>
                         {{ $item->detail_pressure }} 
                     </td>
-                    <td>{{ $item->detail_hose }}</td>
-                    <td>{{ $item->detail_head_valve }}</td>
-                    <td>{{ $item->detail_korosi }}</td>
-                    <td>{{ $item->detail_expired }}</td>
+                    <td>
+                        {{ $item->detail_hose }}
+                        <br>
+                        @if($item->hose_img)
+                            <img src="{{ asset("storage/" . $item->hose_img) }}" alt="" width="100%">
+                        @endif
+                    </td>
+                    <td>
+                        {{ $item->detail_head_valve }}
+                        <br>
+                        @if($item->head_valve_img)
+                            <img src="{{ asset("storage/" . $item->head_valve_img) }}" alt="" width="100%">
+                        @endif
+                    </td>
+                    <td>
+                        {{ $item->detail_korosi }}
+                        <br>
+                        @if($item->korosi_img)
+                            <img src="{{ asset("storage/" . $item->korosi_img) }}" alt="" width="100%">
+                        @endif
+                    </td>
+                    <td>
+                        {{ $item->detail_expired }}
+                        <br>
+                        @if($item->expired_img)
+                            <img src="{{ asset("storage/" . $item->expired_img) }}" alt="" width="100%">
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
