@@ -287,7 +287,7 @@ class CustomerController extends Controller
             )
             ->groupBy('tabel_level.id', 'tabel_level.nama_level')
             ->get();
-        
+
 
         return response()->json([
             'message' => 'Jumlah user aktif per level',
@@ -312,8 +312,7 @@ class CustomerController extends Controller
     }
     public function listAllCustomer (Request $request)
     {
-        $query = User::where("users.akun_aktif", 1)
-        ->leftJoin('tabel_level', 'users.id_level', '=', 'tabel_level.id')
+        $query = User::leftJoin('tabel_level', 'users.id_level', '=', 'tabel_level.id')
         ->select(
             "users.*",
             "tabel_level.nama_level"
