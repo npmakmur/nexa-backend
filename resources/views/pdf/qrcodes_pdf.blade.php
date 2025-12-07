@@ -10,37 +10,74 @@
 
         /* Mengatur halaman untuk cetak A3 */
         @page {
-            size: A3 portrait; /* Mengatur ukuran kertas menjadi A3 potret */
-            margin: 10mm; /* Menambahkan margin 1 cm di setiap sisi */
+            size: A3 portrait;
+            margin: 10mm;
         }
 
-        /* Styling tabel utama */
+        /* Styling tabel utama - menjaga layout agar aman untuk PDF generator */
         .qr-table {
             width: 100%;
-            border-collapse: collapse;
-            border-spacing: 0;
+            border-collapse: separate; /* Gunakan separate agar border-spacing berfungsi */
+            border-spacing: 10px; /* Jarak antar kartu */
         }
 
         /* Styling sel tabel */
         .qr-table td {
-            width: 16.66%; /* Contoh: 6 kolom dalam satu baris (100% / 6 = 16.66%) */
-            padding: 5mm; /* Jarak antar sel */
-            text-align: center;
+            width: 20%; /* SAYA UBAH JADI 5 KOLOM (20%) AGAR KARTU TIDAK TERLALU GEPENG */
             vertical-align: top;
+            padding: 0;
         }
-        
-        /* Styling gambar QR */
-        .qr-item img {
+
+        /* ---- DESAIN KARTU NEXA ---- */
+        .card-container {
+            background-color: #7b52ab; /* Warna Ungu (sesuaikan kode hex jika perlu) */
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            border-radius: 0px; /* Siku tajam sesuai gambar */
+        }
+
+        .card-title {
+            font-size: 28pt; /* Ukuran besar untuk 'NEXA' */
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .card-subtitle {
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .qr-wrapper {
+            background-color: white;
+            padding: 5px; /* Memberikan border putih di sekitar QR */
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .qr-wrapper img {
             width: 100%;
-            max-width: 80mm; /* Contoh: Lebar maksimal gambar sekitar 8cm */
             height: auto;
             display: block;
         }
 
-        .qr-item p {
-            font-size: 12pt;
+        .card-footer {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
             margin-top: 5px;
-            word-wrap: break-word; /* Memastikan teks panjang pindah baris */
+        }
+        
+        /* Kode unik item (optional: agar tahu ini QR untuk item mana) */
+        .item-code {
+            font-size: 7pt;
+            margin-top: 2px;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -49,12 +86,21 @@
         <tr>
             @foreach($qrCodes as $item)
             <td class="qr-cell">
-                <div class="qr-item">
-                    <img src="{{ public_path('storage/' . $item['path']) }}" alt="QR {{ $item['barcode'] }}">
-                    <p>{{ $item['barcode'] }}</p>
+                <div class="card-container">
+                    <div class="card-title">NEXA</div>
+                    
+                    <div class="card-subtitle">SCAN ME TO CHECK FIRE EXTINGUISHER</div>
+                    
+                    <div class="qr-wrapper">
+                        <img src="{{ public_path('storage/' . $item['path']) }}" alt="QR">
+                    </div>
+
+                    <div class="card-footer">TAN ANUGRAH SEJAHTERA</div>
                 </div>
             </td>
-            @if(($loop->index + 1) % 6 == 0)
+
+            {{-- Logic Loop: Ganti baris setiap 5 item (karena width 20%) --}}
+            @if(($loop->index + 1) % 5 == 0)
         </tr><tr>
             @endif
             @endforeach
