@@ -2,43 +2,45 @@
 <html>
 <head>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
 
-        /* Mengatur halaman untuk cetak A3 */
         @page {
             size: A3 portrait;
             margin: 10mm;
         }
 
-        /* Styling tabel utama - menjaga layout agar aman untuk PDF generator */
-        .qr-table {
+        .grid-container {
             width: 100%;
-            border-collapse: separate; /* Gunakan separate agar border-spacing berfungsi */
-            border-spacing: 10px; /* Jarak antar kartu */
+            /* overflow: hidden; <-- Hapus ini, kadang bikin masalah di PDF */
         }
 
-        /* Styling sel tabel */
-        .qr-table td {
-            width: 20%; /* SAYA UBAH JADI 5 KOLOM (20%) AGAR KARTU TIDAK TERLALU GEPENG */
-            vertical-align: top;
-            padding: 0;
+        .grid-item {
+            float: left;
+            /* KUNCI PERBAIKAN: Gunakan mm agar ukuran terkunci */
+            /* 277mm area kerja / 5 kolom = 55.4mm. Kita pakai 54mm biar aman */
+            width: 53mm; 
+            padding: 5px;
         }
 
-        /* ---- DESAIN KARTU NEXA ---- */
         .card-container {
-            background-color: #7b52ab; /* Warna Ungu (sesuaikan kode hex jika perlu) */
+            background-color: #7b52ab;
             color: white;
-            padding: 15px 10px;
             text-align: center;
-            border-radius: 0px; /* Siku tajam sesuai gambar */
+            height: 290px; 
+            padding: 10px 10px;
+            position: relative;
         }
 
         .card-title {
-            font-size: 28pt; /* Ukuran besar untuk 'NEXA' */
+            font-size: 26pt;
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 5px;
@@ -49,62 +51,84 @@
             font-size: 9pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             letter-spacing: 0.5px;
+            padding: 0 5px;
+            line-height: 1.2;
         }
 
         .qr-wrapper {
             background-color: white;
-            padding: 5px; /* Memberikan border putih di sekitar QR */
             display: inline-block;
-            margin-bottom: 10px;
+            width: 100%;
         }
 
         .qr-wrapper img {
             width: 100%;
             height: auto;
-            display: block;
         }
 
         .card-footer {
             font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-top: 5px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+        }
+
+        .page-break {
+            clear: both;
+            page-break-after: always;
         }
         
-        /* Kode unik item (optional: agar tahu ini QR untuk item mana) */
-        .item-code {
-            font-size: 7pt;
-            margin-top: 2px;
-            opacity: 0.8;
+        
+        /* Tambahan helper untuk menutup float terakhir */
+        .clearfix {
+            clear: both;
+            content: "";
+            display: block;
         }
     </style>
 </head>
 <body>
-    <table class="qr-table">
-        <tr>
-            @foreach($qrCodes as $item)
-            <td class="qr-cell">
+
+    <div class="grid-container">
+
+        @foreach($qrCodes as $item)
+            <div class="grid-item">
                 <div class="card-container">
                     <div class="card-title">NEXA</div>
-                    
                     <div class="card-subtitle">SCAN ME TO CHECK FIRE EXTINGUISHER</div>
-                    
-                    <div class="qr-wrapper">
+
+                    <div class="qr-wrapper" style="margin-top: 30px; margin-left: 5px">
+                        {{-- Pastikan path image benar --}}
                         <img src="{{ public_path('storage/' . $item['path']) }}" alt="QR">
                     </div>
 
-                    <div class="card-footer">TAN ANUGRAH SEJAHTERA</div>
+                    <div class="card-footer" style="margin-top: 5px;">TAN ANUGRAH SEJAHTERA</div>
                 </div>
-            </td>
+            </div>
 
-            {{-- Logic Loop: Ganti baris setiap 5 item (karena width 20%) --}}
-            @if(($loop->index + 1) % 5 == 0)
-        </tr><tr>
+            {{-- LOGIC BARIS BARU: Setiap 5 item, lakukan clear float (kecuali jika itu halaman baru) --}}
+            @if(($loop->iteration % 5) == 0)
+                <div style="clear: both;"></div> 
             @endif
-            @endforeach
-        </tr>
-    </table>
+
+            {{-- LOGIC HALAMAN BARU: Setiap 15 item (3 baris x 5 kolom) --}}
+            @if(($loop->iteration % 20) == 0)
+                <div class="page-break"></div>
+            @endif
+
+        @endforeach
+        
+
+        
+        {{-- Penutup container float yang aman --}}
+        <div class="clearfix"></div>
+
+    </div>
+
 </body>
 </html>
