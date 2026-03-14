@@ -46,7 +46,7 @@ class ProductController extends Controller
             {
                 $batch = DB::table("tabel_add_qr")->where("batch", $product->batch)->first();
                 $count = $batch->count_qr;
-                $jumlah = $count - 1; 
+                $jumlah = $count - 1;
                 $update = DB::table("tabel_add_qr")->where("batch", $product->batch)->update([
                     "count_qr" => $jumlah
                 ]);
@@ -163,6 +163,7 @@ class ProductController extends Controller
     public function storeSuperAdmin(Request $request)
     {
         $request->validate([
+            'use_frame' => 'nullable|boolean',
             'deskripsi' => 'nullable|string',
             'brand' => 'required|string|max:191',
             'type' => 'nullable|string|max:191',
@@ -173,6 +174,7 @@ class ProductController extends Controller
             'tanggal_kadaluarsa'   => 'required|date|after_or_equal:tanggal_produksi',
         ]);
 
+        $useFrame = $request->use_frame ?? true;
         $jumlah = $request->jumlah;
         $products = [];
         $qrCodes = [];
@@ -213,7 +215,7 @@ class ProductController extends Controller
             Storage::disk('public')->put($qrPath, $qrImage->getString());
 
             // Update barcode dan kode_barang
-            
+
             $product->update([
                 'barcode' => $linkQRCode,
                 'kode_barang' => $kodeUnik,
@@ -229,7 +231,12 @@ class ProductController extends Controller
         }
 
         // Buat PDF berisi semua QR code
-        $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes])->setPaper('a3', 'portrait');;
+        if ($useFrame) {
+            $pdf = Pdf::loadView('pdf.qrcodes_pdf', ['qrCodes' => $qrCodes])->setPaper('a3', 'portrait');
+        } else {
+            $pdf = Pdf::loadView('pdf.qrcodes_pdf_no_frame', ['qrCodes' => $qrCodes])->setPaper('a3', 'portrait');
+        }
+
         $pdfFileName = 'all_qr_codes_' . now()->format('Ymd_His') . '.pdf';
         $pdfPath = 'qrcodes_pdf/' . $pdfFileName;
         Storage::disk('public')->put($pdfPath, $pdf->output());
@@ -269,7 +276,7 @@ class ProductController extends Controller
                     ->map(function($item){
                         $lokasi = DB::table("tabel_gedung")->where("id", $item->lokasi)->first();
                         $lokasiPoint = DB::table("tabel_titik_penempatan")->where("id", $item->titik_penempatan_id)->first();
-                        
+
                         $item->lokasi = $lokasi->nama_gedung ?? null;
                         $item->titik_penempatan_id = $lokasiPoint->nama_titik ?? null;
                         return $item;
@@ -311,7 +318,7 @@ class ProductController extends Controller
         $qr = DB::table("tabel_add_qr")->where("batch", $batchToUpdate)->update([
             'kode_customer' => $newCustomerCode
         ]);
-        
+
 
 
         return response()->json([
@@ -396,7 +403,7 @@ class ProductController extends Controller
             'garansi' => 'sometimes|string|max:191',
             'lokasi' => 'sometimes|exists:tabel_gedung,id',
             'titik_penempatan_id' => 'sometimes'
-        ], $messages);        
+        ], $messages);
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -405,7 +412,7 @@ class ProductController extends Controller
             ], 422);
         }
 
-        
+
         $product = Product::find($request->id);
         $data = $request->except('id');
         $data['updated_at'] = now();
@@ -438,7 +445,7 @@ class ProductController extends Controller
     public function detail_apar(Request $request)
     {
         $product = Product::select(
-            'tabel_produk.*', 
+            'tabel_produk.*',
             'pressure_kondisi.detail_kondisi as detail_pressure',
             'hose_kondisi.detail_kondisi as detail_hose',
             'head_valve_kondisi.detail_kondisi as detail_head_valve',
@@ -461,7 +468,7 @@ class ProductController extends Controller
 
         $history = DB::table("tabel_inspection")
         ->select(
-            'tabel_inspection.*', 
+            'tabel_inspection.*',
             'pressure_kondisi.detail_kondisi as detail_pressure',
             'hose_kondisi.detail_kondisi as detail_hose',
             'head_valve_kondisi.detail_kondisi as detail_head_valve',
@@ -604,7 +611,7 @@ class ProductController extends Controller
             return $data;
         })
         ->filter(function($data) {
-            return $data->last_inspection 
+            return $data->last_inspection
                 && $data->last_inspection->status === 'rusak';
         })
         ->values(); // reset index biar rapi
@@ -649,12 +656,12 @@ class ProductController extends Controller
             ->where("kode_customer", auth()->user()->kode_customer)
             ->count();
 
-        $percentageNotRusak = $totalInspection > 0 
-            ? min(100, round(($data / $totalInspection) * 100, 2)) 
+        $percentageNotRusak = $totalInspection > 0
+            ? min(100, round(($data / $totalInspection) * 100, 2))
             : 0;
 
-        $percentageRusak = $totalInspection > 0 
-            ? min(100, round((($totalInspection - $data) / $totalInspection) * 100, 2)) 
+        $percentageRusak = $totalInspection > 0
+            ? min(100, round((($totalInspection - $data) / $totalInspection) * 100, 2))
             : 0;
 
         return response()->json([
