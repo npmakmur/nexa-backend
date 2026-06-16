@@ -35,8 +35,9 @@
                 <th>tanggal_cek</th>
                 <th>lokasi</th>
                 <th>pressure</th>
-                <th>selang</th>
-                <th>head valve</th>
+                <th>Selang</th>
+                <th>Kondisi Selang</th>
+                <th>Head Valve</th>
                 <th>Korosi</th>
                 <th>expired</th>
             </tr>
@@ -53,34 +54,39 @@
                     <td>{{ $item->tanggal_cek }}</td>
                     <td>{{ $item->lokasi ?? '-' }}</td>
                     <td>
-                        {{ $item->detail_pressure }} 
+                        {{ $item->detail_pressure }}
+                        <br>
+                        @if($item->pressure_img)
+                            <img src="{{ public_path('storage/' . $item->pressure_img) }}" alt="" width="100%">
+                        @endif
                     </td>
+                    <td>{{ is_null($item->checklist_selang) ? '-' : ($item->checklist_selang ? 'Ada' : 'Tidak Ada') }}</td>
                     <td>
-                        {{ $item->detail_hose }}
+                        {{ $item->detail_hose ?? '-' }}
                         <br>
                         @if($item->hose_img)
-                            <img src="{{ asset("storage/" . $item->hose_img) }}" alt="" width="100%">
+                            <img src="{{ public_path('storage/' . $item->hose_img) }}" alt="" width="100%">
                         @endif
                     </td>
                     <td>
                         {{ $item->detail_head_valve }}
                         <br>
                         @if($item->head_valve_img)
-                            <img src="{{ asset("storage/" . $item->head_valve_img) }}" alt="" width="100%">
+                            <img src="{{ public_path('storage/' . $item->head_valve_img) }}" alt="" width="100%">
                         @endif
                     </td>
                     <td>
                         {{ $item->detail_korosi }}
                         <br>
                         @if($item->korosi_img)
-                            <img src="{{ asset("storage/" . $item->korosi_img) }}" alt="" width="100%">
+                            <img src="{{ public_path('storage/' . $item->korosi_img) }}" alt="" width="100%">
                         @endif
                     </td>
                     <td>
                         {{ $item->detail_expired }}
                         <br>
                         @if($item->expired_img)
-                            <img src="{{ asset("storage/" . $item->expired_img) }}" alt="" width="100%">
+                            <img src="{{ public_path('storage/' . $item->expired_img) }}" alt="" width="100%">
                         @endif
                     </td>
                 </tr>

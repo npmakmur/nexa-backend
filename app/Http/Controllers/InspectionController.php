@@ -170,7 +170,8 @@ class InspectionController extends Controller
         'id_inspection'      => 'nullable|numeric',
         'pressure'           => 'required|numeric',
         'expired'            => 'required|numeric',
-        'selang'             => 'required|numeric',
+        'selang'             => 'nullable|numeric',
+        'checklist_selang'   => 'nullable|boolean',
         'head_valve'         => 'required|numeric',
         'korosi'             => 'required|numeric',
         'pressure_img'       => 'nullable|image|max:2048',
@@ -216,7 +217,7 @@ class InspectionController extends Controller
                     ->where('kode_customer', $schedule->kode_customer)
                     ->first();
 
-    if (!$customer) {
+    if (!isset($customer)) {
         return response()->json(['message' => 'Pelanggan tidak ditemukan untuk jadwal ini.'], 404);
     }
 
@@ -225,10 +226,13 @@ class InspectionController extends Controller
     $inspectionAnswers = [
         'pressure'   => (int) $request->pressure,
         'expired'    => (int) $request->expired,
-        'selang'     => (int) $request->selang,
         'head_valve' => (int) $request->head_valve,
         'korosi'     => (int) $request->korosi,
     ];
+
+    if ($request->filled('selang')) {
+        $inspectionAnswers['selang'] = (int) $request->selang;
+    }
 
     foreach ($inspectionAnswers as $field => $value) {
         if (in_array($value, $idRusak)) {
@@ -289,8 +293,9 @@ class InspectionController extends Controller
         "pressure_img"       => $imagePaths['pressure_img'],
         "expired"            => $request->expired,
         "expired_img"        => $imagePaths['expired_img'],
-        "hose"             => $request->selang,
+        "hose"             => $request->filled('selang') ? $request->selang : null,
         "hose_img"         => $imagePaths['selang_img'],
+        "checklist_selang"   => $request->has('checklist_selang') ? (bool) $request->checklist_selang : null,
         "head_valve"         => $request->head_valve,
         "head_valve_img"     => $imagePaths['head_valve_img'],
         "korosi"             => $request->korosi,
@@ -351,16 +356,25 @@ class InspectionController extends Controller
         ]);
 
     // 8. Perbarui status Produk dan tanggal inspeksi terakhir
-    DB::table('tabel_produk')->where("kode_barang", $request->kode_barang)->update([
+    $productUpdate = [
         "pressure"        => $request->pressure,
         "expired"         => $request->expired,
-        "hose"          => $request->selang,
         "head_valve"      => $request->head_valve,
         "korosi"          => $request->korosi,
         "status"          => $status,
         "last_inspection" => $now,
         "updated_at"      => $now, // Tambahkan updated_at
-    ]);
+    ];
+
+    if ($request->has('selang')) {
+        $productUpdate['hose'] = $request->filled('selang') ? $request->selang : null;
+    }
+
+    if ($request->has('checklist_selang')) {
+        $productUpdate['checklist_selang'] = (bool) $request->checklist_selang;
+    }
+
+    DB::table('tabel_produk')->where("kode_barang", $request->kode_barang)->update($productUpdate);
 
     // 9. Catat aktivitas
     DB::table('tabel_aktivitas')->insert([
@@ -376,6 +390,7 @@ class InspectionController extends Controller
         'status'  => $status,
     ], 201);
  }
+ 
  public function listInspection (Request $request)
  {
    $list = TabelHeaderJadwal::where("tabel_header_jadwal.kode_customer", auth()->user()->kode_customer)
@@ -412,6 +427,7 @@ class InspectionController extends Controller
     ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
     ->select(
         'tabel_inspection.*',
+        'tabel_inspection.checklist_selang',
         'qc_name.name as qc_name',
         'pressure_kondisi.detail_kondisi as detail_pressure',
         'hose_kondisi.detail_kondisi as detail_hose',
@@ -502,6 +518,7 @@ public function generateAparReport(Request $request)
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
         ->select(
             'tabel_inspection.*',
+            'tabel_inspection.checklist_selang',
             'qc_name.name as qc_name',
             'pressure_kondisi.detail_kondisi as detail_pressure',
             'hose_kondisi.detail_kondisi as detail_hose',
@@ -594,8 +611,31 @@ public function precetagePartBroken (Request $request)
 }
 public function detailInspectionApar(Request $request)
 {
-    $apar = DB::table('tabel_inspection')->where("id_inspection", $request->id_inspection)
+    $validator = Validator::make($request->all(), [
+        'id_inspection' => 'nullable',
+        'id'            => 'nullable',
+        'barcode'       => 'nullable',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validasi gagal.',
+            'errors'  => $validator->errors()
+        ], 422);
+    }
+
+    if (!$request->filled('id_inspection') && (!$request->filled('id') || !$request->filled('barcode'))) {
+        return response()->json([
+            'message' => 'Validasi gagal.',
+            'errors'  => [
+                'filter' => ['Harap tentukan id_inspection ATAU pasangan id dan barcode.']
+            ]
+        ], 422);
+    }
+
+    $query = DB::table('tabel_inspection')
         ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
+        ->leftJoin('tabel_header_jadwal as jadwal', 'jadwal.no_jadwal', '=', 'tabel_inspection.no_jadwal')
         ->leftJoin('tabel_gedung as location', 'location.id', '=', 'produk.lokasi')
         ->leftJoin('tabel_titik_penempatan as preposition_place', 'preposition_place.id', '=', 'produk.titik_penempatan_id')
         ->leftJoin('users as qc_name', 'qc_name.id', '=', 'tabel_inspection.qc')
@@ -603,9 +643,22 @@ public function detailInspectionApar(Request $request)
         ->leftJoin('tabel_detail_kondisi as hose_kondisi', 'tabel_inspection.hose', '=', 'hose_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
-        ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
-        ->select(
+        ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id');
+
+    if ($request->filled('id_inspection')) {
+        $query->where('tabel_inspection.id_inspection', $request->id_inspection);
+    } else {
+        $query->where('jadwal.id', $request->id)
+              ->where('produk.barcode', base64_decode($request->barcode));
+    }
+
+    // return response([
+    //     'barcode' => base64_decode($request->barcode)
+    // ]);
+
+    $apar = $query->select(
             'tabel_inspection.id_inspection',
+            'tabel_inspection.checklist_selang',
             'produk.barcode',
             'produk.brand',
             'produk.type',
