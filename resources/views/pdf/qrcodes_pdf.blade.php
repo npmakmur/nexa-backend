@@ -73,7 +73,7 @@
             font-weight: bold;
             text-transform: uppercase;
             position: absolute;
-            bottom: 20px;
+            bottom: 10px;
             left: 0;
             width: 100%;
         }
@@ -107,7 +107,10 @@
                         <img src="{{ public_path('storage/' . $item['path']) }}" alt="QR">
                     </div>
 
-                    <div class="card-footer" style="margin-top: 5px;">TAN ANUGRAH SEJAHTERA</div>
+                    <div class="card-footer" style="margin-top: 5px;">
+                        {{ $item['barcode'] }} <br>
+                        TAN ANUGRAH SEJAHTERA
+                    </div>
                 </div>
             </div>
 
