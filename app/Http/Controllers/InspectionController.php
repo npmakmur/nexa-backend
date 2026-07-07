@@ -427,7 +427,7 @@ class InspectionController extends Controller
     ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
     ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
     ->leftJoin('tabel_gedung as gedung', 'gedung.id', '=', 'produk.lokasi')
-    ->leftJoin('tabel_titik_penempatan as titik', 'titik.gedung_id', '=', 'gedung.id')
+    ->leftJoin('tabel_titik_penempatan as titik', 'titik.id', '=', 'produk.titik_penempatan_id')
     ->select(
         'tabel_inspection.*',
         'tabel_inspection.checklist_selang',
@@ -522,7 +522,7 @@ public function generateAparReport(Request $request)
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
         ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
         ->leftJoin('tabel_gedung as gedung', 'gedung.id', '=', 'produk.lokasi')
-        ->leftJoin('tabel_titik_penempatan as titik', 'titik.gedung_id', '=', 'gedung.id')
+        ->leftJoin('tabel_titik_penempatan as titik', 'titik.id', '=', 'produk.titik_penempatan_id')
         ->select(
             'tabel_inspection.*',
             'tabel_inspection.checklist_selang',
