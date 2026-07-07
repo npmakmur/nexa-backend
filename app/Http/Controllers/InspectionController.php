@@ -425,6 +425,9 @@ class InspectionController extends Controller
     ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
     ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
     ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
+    ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
+    ->leftJoin('tabel_gedung as gedung', 'gedung.id', '=', 'produk.lokasi')
+    ->leftJoin('tabel_titik_penempatan as titik', 'titik.gedung_id', '=', 'gedung.id')
     ->select(
         'tabel_inspection.*',
         'tabel_inspection.checklist_selang',
@@ -433,7 +436,8 @@ class InspectionController extends Controller
         'hose_kondisi.detail_kondisi as detail_hose',
         'head_valve_kondisi.detail_kondisi as detail_head_valve',
         'korosi_kondisi.detail_kondisi as detail_korosi',
-        'expired_kondisi.detail_kondisi as detail_expired'
+        'expired_kondisi.detail_kondisi as detail_expired',
+        DB::raw("CONCAT(gedung.nama_gedung, ' - ', titik.nama_titik) as lokasi")
     )
     ->get();
     return response()->json([
@@ -516,6 +520,9 @@ public function generateAparReport(Request $request)
         ->leftJoin('tabel_detail_kondisi as head_valve_kondisi', 'tabel_inspection.head_valve', '=', 'head_valve_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as korosi_kondisi', 'tabel_inspection.korosi', '=', 'korosi_kondisi.id')
         ->leftJoin('tabel_detail_kondisi as expired_kondisi', 'tabel_inspection.expired', '=', 'expired_kondisi.id')
+        ->leftJoin('tabel_produk as produk', 'produk.kode_barang', '=', 'tabel_inspection.kode_barang')
+        ->leftJoin('tabel_gedung as gedung', 'gedung.id', '=', 'produk.lokasi')
+        ->leftJoin('tabel_titik_penempatan as titik', 'titik.gedung_id', '=', 'gedung.id')
         ->select(
             'tabel_inspection.*',
             'tabel_inspection.checklist_selang',
@@ -524,7 +531,8 @@ public function generateAparReport(Request $request)
             'hose_kondisi.detail_kondisi as detail_hose',
             'head_valve_kondisi.detail_kondisi as detail_head_valve',
             'korosi_kondisi.detail_kondisi as detail_korosi',
-            'expired_kondisi.detail_kondisi as detail_expired'
+            'expired_kondisi.detail_kondisi as detail_expired',
+            DB::raw("CONCAT(gedung.nama_gedung, ' - ', titik.nama_titik) as lokasi")
         )
         ->get();
     // Generate PDF
